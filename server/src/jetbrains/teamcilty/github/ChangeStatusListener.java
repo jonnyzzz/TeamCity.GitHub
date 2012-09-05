@@ -2,14 +2,11 @@ package jetbrains.teamcilty.github;
 
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.vcs.SVcsModification;
-import jetbrains.buildServer.vcs.SelectPrevBuildPolicy;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static jetbrains.teamcilty.github.ChangeStatusUpdater.Handler;
@@ -56,14 +53,11 @@ public class ChangeStatusListener {
 
   @NotNull
   private Map<VcsRootInstance, String> getLatestChangesHash(@NotNull final SRunningBuild build) {
-    final List<SVcsModification> changes = build.getChanges(SelectPrevBuildPolicy.SINCE_LAST_COMPLETE_BUILD, false);
     final Map<VcsRootInstance, String> result = new HashMap<VcsRootInstance, String>();
-
-    for (SVcsModification change : changes) {
-      if (!"jetbrains.git".equals(change.getVcsRoot().getVcsName())) continue;
-      result.put(change.getVcsRoot(), change.getVersion());
+    for (BuildRevision rev : build.getRevisions()) {
+      if (!"jetbrains.git".equals(rev.getRoot().getVcsName())) continue;
+      result.put(rev.getRoot(), rev.getRevision());
     }
-
     return result;
   }
 }
