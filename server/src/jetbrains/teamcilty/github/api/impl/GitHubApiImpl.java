@@ -55,6 +55,7 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
+  @SuppressWarnings("UnusedDeclaration")
   private class CommitStatus {
     private String state;
     private String target_url;
