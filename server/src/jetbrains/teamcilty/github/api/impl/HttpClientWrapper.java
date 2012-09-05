@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package jetbrains.teamcilty.github.api;
+package jetbrains.teamcilty.github.api.impl;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -26,7 +26,7 @@ import java.io.IOException;
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
  * Date: 12.08.11 15:13
  */
-public interface FeedClient {
+public interface HttpClientWrapper {
   @NotNull
   HttpResponse execute(@NotNull HttpUriRequest request) throws IOException;
 }

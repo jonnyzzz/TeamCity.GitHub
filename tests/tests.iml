@@ -27,6 +27,7 @@
     <orderEntry type="library" name="idea annotations.jar" level="project" />
     <orderEntry type="library" name="commons-http" level="project" />
     <orderEntry type="library" name="commons-logging" level="project" />
+    <orderEntry type="library" name="gson" level="project" />
   </component>
 </module>
 

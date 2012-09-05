@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package jetbrains.teamcilty.github.api;
+package jetbrains.teamcilty.github.api.impl;
 
 import jetbrains.buildServer.version.ServerVersionHolder;
 import org.apache.http.HttpResponse;
@@ -39,10 +39,10 @@ import java.net.ProxySelector;
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
  * Date: 11.08.11 16:24
  */
-public class FeedHttpClientHolder implements FeedClient {
+public class HttpClientWrapperImpl implements HttpClientWrapper {
   private final HttpClient myClient;
 
-  public FeedHttpClientHolder() {
+  public HttpClientWrapperImpl() {
     final String serverVersion = ServerVersionHolder.getVersion().getDisplayVersion();
 
     final HttpParams ps = new BasicHttpParams();
