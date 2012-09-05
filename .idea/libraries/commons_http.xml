@@ -1,0 +1,23 @@
+<component name="libraryTable">
+  <library name="commons-http">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/httpclient-cache-4.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/httpclient-4.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/httpcore-4.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/httpmime-4.1.2.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/commons-codec-1.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-client-4.1.2-src.zip!/httpcomponents-client-4.1.2/httpmime/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-client-4.1.2-src.zip!/httpcomponents-client-4.1.2/httpclient-contrib/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-client-4.1.2-src.zip!/httpcomponents-client-4.1.2/httpclient-benchmark/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-client-4.1.2-src.zip!/httpcomponents-client-4.1.2/httpclient/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-core-4.1.2-src.zip!/httpcomponents-core-4.1.2/httpcore/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-core-4.1.2-src.zip!/httpcomponents-core-4.1.2/httpcore-nio/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-core-4.1.2-src.zip!/httpcomponents-core-4.1.2/httpcore-contrib/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-core-4.1.2-src.zip!/httpcomponents-core-4.1.2/httpcore-benchmark/src/main/java" />
+      <root url="jar://$PROJECT_DIR$/lib/httpcomponents-client/src/httpcomponents-core-4.1.2-src.zip!/httpcomponents-core-4.1.2/httpcore-ab/src/main/java" />
+    </SOURCES>
+  </library>
+</component>
