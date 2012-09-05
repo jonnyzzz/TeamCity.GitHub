@@ -30,6 +30,8 @@ public class UpdateChanesStatusController extends BaseController {
   protected ModelAndView doHandle(@NotNull final HttpServletRequest request,
                                   @NotNull final HttpServletResponse response) throws Exception {
     final ModelAndView mw = new ModelAndView(myDescriptor.getPluginResourcesPath("feature.jsp"));
+    //TODO: find build type settings and check for VCS roots to note the user
+    //TODO: may also introduce check-connection like API here too
     return mw;
   }
 }
