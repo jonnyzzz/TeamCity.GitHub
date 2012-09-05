@@ -24,6 +24,7 @@ public class GitHubApiTest extends BaseTestCase {
   private static final String REPOSITORY = "repository";
   private static final String PASSWORD_REV = "password-rev";
   private GitHubApi myApi;
+  private String myRepoName;
 
   @BeforeMethod
   @Override
@@ -31,11 +32,12 @@ public class GitHubApiTest extends BaseTestCase {
     super.setUp();
 
     final Properties ps = readGitHubAccount();
+    myRepoName = ps.getProperty(REPOSITORY);
+
     myApi = new GitHubApiImpl(
             new HttpClientWrapperImpl(),
             ps.getProperty(URL),
             ps.getProperty(USERNAME),
-            ps.getProperty(REPOSITORY),
             rewind(ps.getProperty(PASSWORD_REV)));
   }
 
@@ -80,12 +82,12 @@ public class GitHubApiTest extends BaseTestCase {
 
   @Test
   public void test_read_status() throws IOException {
-    myApi.readChangeStatus("605e36e23f7a64515691da631190baaf45fdaed9");
+    myApi.readChangeStatus(myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9");
   }
 
   @Test
   public void test_set_status() throws IOException, AuthenticationException {
-    myApi.setChangeStatus("605e36e23f7a64515691da631190baaf45fdaed9",
+    myApi.setChangeStatus(myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9",
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status"

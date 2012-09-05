@@ -30,23 +30,21 @@ public class GitHubApiImpl implements GitHubApi {
   private final Gson myGson = new Gson();
   private final String myUrl;
   private final String myUserName;
-  private final String myRepoName;
   private final String myPassword;
 
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
                        @NotNull final String url,
                        @NotNull final String userName,
-                       @NotNull final String repoName,
                        @NotNull final String password) {
     myClient = client;
     myUrl = url;
     myUserName = userName;
-    myRepoName = repoName;
     myPassword = password;
   }
 
-  public String readChangeStatus(@NotNull final String hash) throws IOException {
-    HttpGet post = new HttpGet(getStatusUrl(hash));
+  public String readChangeStatus(@NotNull final String repoName,
+                                 @NotNull final String hash) throws IOException {
+    HttpGet post = new HttpGet(getStatusUrl(repoName, hash));
     try {
       HttpResponse execute = myClient.execute(post);
 
@@ -84,11 +82,12 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  public void setChangeStatus(@NotNull final String hash,
-                              @NotNull GitHubChangeState status,
-                              @NotNull String targetUrl,
-                              @NotNull String description) throws IOException {
-    String url = getStatusUrl(hash);
+  public void setChangeStatus(@NotNull final String repoName,
+                              @NotNull final String hash,
+                              @NotNull final GitHubChangeState status,
+                              @NotNull final String targetUrl,
+                              @NotNull final String description) throws IOException {
+    String url = getStatusUrl(repoName, hash);
     HttpPost post = new HttpPost(url);
     try {
       post.setEntity(new GSonEntity(new CommitStatus(status.getState(), targetUrl, description)));
@@ -109,7 +108,7 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private String getStatusUrl(String hash) {
-    return myUrl + "/repos/" + myUserName + "/" + myRepoName + "/statuses/" + hash;
+  private String getStatusUrl(String repoName, String hash) {
+    return myUrl + "/repos/" + myUserName + "/" + repoName + "/statuses/" + hash;
   }
 }

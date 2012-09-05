@@ -9,9 +9,11 @@ import java.io.IOException;
  * Date: 06.09.12 2:39
  */
 public interface GitHubApi {
-  String readChangeStatus(@NotNull String hash) throws IOException;
+  String readChangeStatus(@NotNull String repositoryName,
+                          @NotNull String hash) throws IOException;
 
-  void setChangeStatus(@NotNull String hash,
+  void setChangeStatus(@NotNull String repositoryName,
+                       @NotNull String hash,
                        @NotNull GitHubChangeState status,
                        @NotNull String targetUrl,
                        @NotNull String description) throws IOException;
