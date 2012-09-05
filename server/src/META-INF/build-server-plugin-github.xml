@@ -11,6 +11,7 @@
   <bean class="jetbrains.teamcilty.github.ui.UpdateChanesStatusController"/>
 
   <bean class="jetbrains.teamcilty.github.ChangeStatusListener"/>
+  <bean class="jetbrains.teamcilty.github.ChangeStatusUpdater"/>
 
   <bean class="jetbrains.teamcilty.github.api.impl.GitHubApiFactoryImpl"/>
   <bean class="jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl" destroy-method="dispose"/>

@@ -7,6 +7,8 @@ import org.jetbrains.annotations.NotNull;
  * Date: 06.09.12 2:54
  */
 public interface GitHubApiFactory {
+  public static final String DEFAULT_URL = "https://api.github.com";
+
   @NotNull
   GitHubApi openGitHub(@NotNull final String url,
                        @NotNull final String username,

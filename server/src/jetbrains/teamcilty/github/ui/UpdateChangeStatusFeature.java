@@ -15,6 +15,7 @@ import java.util.Map;
  * Date: 05.09.12 22:41
  */
 public class UpdateChangeStatusFeature extends BuildFeature {
+  public static final String FEATURE_TYPE = "teamcity.github.status";
   private final UpdateChangePaths myPaths;
 
   public UpdateChangeStatusFeature(@NotNull final UpdateChangePaths paths) {
@@ -24,7 +25,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   @NotNull
   @Override
   public String getType() {
-    return "teamcity.github.status";
+    return FEATURE_TYPE;
   }
 
   @NotNull
@@ -48,12 +49,25 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   @Nullable
   @Override
   public PropertiesProcessor getParametersProcessor() {
+    final UpdateChangesConstants c = new UpdateChangesConstants();
     return new PropertiesProcessor() {
-      @NotNull
-      public Collection<InvalidProperty> process(@Nullable final Map<String, String> properties) {
-        final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
-        if (properties == null) return result;
+      private void checkNotEmpty(@NotNull final Map<String, String> properties,
+                                 @NotNull final String key,
+                                 @NotNull final String message,
+                                 @NotNull final Collection<InvalidProperty> res) {
+        if (jetbrains.buildServer.util.StringUtil.isEmptyOrSpaces(properties.get(key))) {
+          res.add(new InvalidProperty(key, message));
+        }
+      }
 
+      @NotNull
+      public Collection<InvalidProperty> process(@Nullable final Map<String, String> p) {
+        final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
+        if (p == null) return result;
+
+        checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
+        checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
+        checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
 
         return result;
       }
