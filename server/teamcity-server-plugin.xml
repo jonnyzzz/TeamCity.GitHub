@@ -2,8 +2,8 @@
 <teamcity-plugin xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:noNamespaceSchemaLocation="urn:shemas-jetbrains-com:teamcity-plugin-v1-xml">
   <info>
-    <name>PLUGIN_NAME</name>
-    <display-name>PLUGIN_DESCRIPTION</display-name>
+    <name>TeamCity.GitHub</name>
+    <display-name>GitHub integration</display-name>
     <version>@Plugin_Version@</version> <!-- will be replaced from script -->
     <vendor>
       <name>@Plugin_Vendor@</name>  <!-- will be replaced from script -->
