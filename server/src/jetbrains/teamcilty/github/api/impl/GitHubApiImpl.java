@@ -3,7 +3,6 @@ package jetbrains.teamcilty.github.api.impl;
 import com.google.gson.Gson;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
@@ -46,10 +45,7 @@ public class GitHubApiImpl implements GitHubApi {
                                  @NotNull final String hash) throws IOException {
     HttpGet post = new HttpGet(getStatusUrl(repoName, hash));
     try {
-      HttpResponse execute = myClient.execute(post);
-
-      HttpEntity entity = execute.getEntity();
-      entity.writeTo(System.out);
+      final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
@@ -94,10 +90,7 @@ public class GitHubApiImpl implements GitHubApi {
       post.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), post));
       post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
 
-      HttpResponse execute = myClient.execute(post);
-
-      HttpEntity entity = execute.getEntity();
-      entity.writeTo(System.out);
+      final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
