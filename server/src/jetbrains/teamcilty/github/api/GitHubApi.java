@@ -1,6 +1,7 @@
 package jetbrains.teamcilty.github.api;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -8,6 +9,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.message.BasicHeader;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -53,23 +55,26 @@ public class GitHubApi {
     }
   }
 
-  public String setChangeStatus(@NotNull final String hash,
+  public void setChangeStatus(@NotNull final String hash,
                                 @NotNull GitHubChangeState status,
                                 @NotNull String targetUrl,
-                                @NotNull String description) throws IOException, AuthenticationException {
+                                @NotNull String description) throws IOException {
     String url = getStatusUrl(hash);
     HttpPost post = new HttpPost(url);
-    post.setEntity(new StringEntity(" { state : \"success\", target_url : null, description : \"aaa\"  } ", "application/json", "utf-8"));
-    post.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), post));
     try {
+      post.setEntity(new StringEntity("{ \"state\": \"success\", \"target_url\": null, \"description\": \"aaa\"  }", "application/json", "UTF-8"));
+      post.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), post));
+      post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+
       HttpResponse execute = myClient.execute(post);
 
       HttpEntity entity = execute.getEntity();
       entity.writeTo(System.out);
-      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
+      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
-      return "TBD";
+    } catch (AuthenticationException e) {
+      throw new IOException(e);
     } finally {
       post.abort();
     }
