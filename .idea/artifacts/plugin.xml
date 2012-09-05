@@ -1,0 +1,22 @@
+<component name="ArtifactManager">
+  <artifact name="plugin">
+    <output-path>$PROJECT_DIR$/out/artifacts/plugin</output-path>
+    <properties id="ant-postprocessing">
+      <options enabled="true" />
+    </properties>
+    <root id="root">
+      <element id="directory" name="server">
+        <element id="archive" name="sample-plugin-server.jar">
+          <element id="module-output" name="server" />
+          <element id="javaee-facet-resources" facet="server/web/server" />
+        </element>
+        <element id="archive" name="sample-plugin-resources.jar">
+          <element id="directory" name="buildServerResources">
+            <element id="dir-copy" path="$PROJECT_DIR$/server/resources" />
+          </element>
+        </element>
+      </element>
+      <element id="file-copy" path="$PROJECT_DIR$/server/teamcity-server-plugin.xml" output-file-name="teamcity-plugin.xml" />
+    </root>
+  </artifact>
+</component>
