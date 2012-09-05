@@ -3,11 +3,13 @@ package jetbrains.teamcilty.github.ui;
 import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -68,6 +70,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
         checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
+        checkNotEmpty(p, c.getServerKey(), "GitHub server api URL", result);
 
         return result;
       }
@@ -77,7 +80,9 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   @Nullable
   @Override
   public Map<String, String> getDefaultParameters() {
-    return super.getDefaultParameters();
+    final Map<String, String> map = new HashMap<String, String>();
+    map.put(new UpdateChangesConstants().getServerKey(), GitHubApiFactory.DEFAULT_URL);
+    return map;
   }
 
   @Override

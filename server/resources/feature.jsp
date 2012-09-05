@@ -6,7 +6,7 @@
   <th>GitHub Url:</th>
   <td>
     <props:textProperty name="${keys.serverKey}"/>
-    <span class="smallNote">Specify GitHub instance URL. Leave blank if you use GitHub.com</span>
+    <span class="smallNote">Specify GitHub instance URL</span>
   </td>
 </tr>
 <tr>
