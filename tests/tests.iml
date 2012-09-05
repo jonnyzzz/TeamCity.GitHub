@@ -25,6 +25,8 @@
     <orderEntry type="library" name="Idea-OpenApi" level="project" />
     <orderEntry type="library" name="Servlet Api" level="project" />
     <orderEntry type="library" name="idea annotations.jar" level="project" />
+    <orderEntry type="library" name="commons-http" level="project" />
+    <orderEntry type="library" name="commons-logging" level="project" />
   </component>
 </module>
 
