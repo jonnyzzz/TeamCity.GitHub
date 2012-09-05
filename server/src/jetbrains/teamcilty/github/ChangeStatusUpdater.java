@@ -43,7 +43,7 @@ public class ChangeStatusUpdater {
 
   @NotNull
   public Handler getUpdateHandler(@NotNull final SBuildFeatureDescriptor feature) {
-    if (feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) {
+    if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) {
       throw new IllegalArgumentException("Unexpected feature type " + feature.getType());
     }
 
