@@ -19,32 +19,38 @@
 <jsp:useBean id="keys" class="jetbrains.teamcilty.github.ui.UpdateChangesConstants"/>
 
 <tr>
-  <th>GitHub Url:</th>
+  <td colspan="2">Specify GitHub repository name and credentials to push status updates</td>
+</tr>
+<tr>
+  <th>Url:<l:star/></th>
   <td>
-    <props:textProperty name="${keys.serverKey}"/>
+    <props:textProperty name="${keys.serverKey}" className="longField"/>
+    <span class="error" id="error_${keys.serverKey}"></span>
     <span class="smallNote">Specify GitHub instance URL</span>
   </td>
 </tr>
 <tr>
-  <th>GitHub User Name:<l:star/></th>
+  <th>UserName:<l:star/></th>
   <td>
-    <props:textProperty name="${keys.userNameKey}"/>
+    <props:textProperty name="${keys.userNameKey}" className="longField"/>
+    <span class="error" id="error_${keys.userNameKey}"></span>
     <span class="smallNote">Specify GitHub username</span>
   </td>
 </tr>
 <tr>
-  <th>GitHub Password:<l:star/></th>
+  <th>Password:<l:star/></th>
   <td>
-    <props:passwordProperty name="${keys.passwordKey}"/>
+    <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
+    <span class="error" id="error_${keys.passwordKey}"></span>
     <span class="smallNote">Specify GitHub password</span>
   </td>
 </tr>
 <tr>
-  <th>GitHub Repository:<l:star/></th>
+  <th>Repository:<l:star/></th>
   <td>
-    <props:textProperty name="${keys.repositoryNameKey}"/>
+    <props:textProperty name="${keys.repositoryNameKey}" className="longField"/>
+    <span class="error" id="error_${keys.repositoryNameKey}"></span>
     <span class="smallNote">Specify GitHub repository name to push changes statuses to</span>
   </td>
 </tr>
 
-<!-- this page supports .jsp resources resolving -->
