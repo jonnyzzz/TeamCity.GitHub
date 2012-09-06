@@ -19,10 +19,10 @@
 <jsp:useBean id="keys" class="jetbrains.teamcilty.github.ui.UpdateChangesConstants"/>
 
 <tr>
-  <td colspan="2">Specify GitHub repository name and credentials to push status updates</td>
+  <td colspan="2">Specify GitHub repository name and credentials to push status updates to</td>
 </tr>
 <tr>
-  <th>Url:<l:star/></th>
+  <th>URL:<l:star/></th>
   <td>
     <props:textProperty name="${keys.serverKey}" className="longField"/>
     <span class="error" id="error_${keys.serverKey}"></span>
@@ -30,11 +30,11 @@
   </td>
 </tr>
 <tr>
-  <th>UserName:<l:star/></th>
+  <th>User Name:<l:star/></th>
   <td>
     <props:textProperty name="${keys.userNameKey}" className="longField"/>
     <span class="error" id="error_${keys.userNameKey}"></span>
-    <span class="smallNote">Specify GitHub username</span>
+    <span class="smallNote">Specify GitHub user name</span>
   </td>
 </tr>
 <tr>
@@ -50,7 +50,7 @@
   <td>
     <props:textProperty name="${keys.repositoryNameKey}" className="longField"/>
     <span class="error" id="error_${keys.repositoryNameKey}"></span>
-    <span class="smallNote">Specify GitHub repository name to push changes statuses to</span>
+    <span class="smallNote">Specify GitHub repository name to push change statuses to</span>
   </td>
 </tr>
 
