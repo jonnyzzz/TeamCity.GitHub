@@ -24,18 +24,18 @@ public class ChangeStatusListener {
     myUpdater = updater;
     listener.addListener(new BuildServerAdapter(){
       @Override
-      public void buildStarted(SRunningBuild build) {
-        updateBuildStatus(build);
+      public void changesLoaded(SRunningBuild build) {
+        updateBuildStatus(build, true);
       }
 
       @Override
       public void buildFinished(SRunningBuild build) {
-        updateBuildStatus(build);
+        updateBuildStatus(build, false);
       }
     });
   }
 
-  private void updateBuildStatus(@NotNull final SRunningBuild build) {
+  private void updateBuildStatus(@NotNull final SRunningBuild build, boolean isStarting) {
     SBuildType bt = build.getBuildType();
     if (bt == null) return;
 
@@ -46,7 +46,11 @@ public class ChangeStatusListener {
 
       Map<VcsRootInstance, String> changes = getLatestChangesHash(build);
       for (Map.Entry<VcsRootInstance, String> e : changes.entrySet()) {
-        h.scheduleChangeUpdate(e.getValue(), build);
+        if (isStarting) {
+          h.scheduleChangeStarted(e.getValue(), build);
+        } else {
+          h.scheduleChangeCompeted(e.getValue(), build);
+        }
       }
     }
   }

@@ -1,7 +1,6 @@
 package jetbrains.teamcilty.github;
 
 import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.StatusDescriptor;
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.WebLinks;
@@ -38,7 +37,8 @@ public class ChangeStatusUpdater {
   }
 
   public static interface Handler {
-    void scheduleChangeUpdate(@NotNull final String hash, @NotNull final SRunningBuild build);
+    void scheduleChangeStarted(@NotNull final String hash, @NotNull final SRunningBuild build);
+    void scheduleChangeCompeted(@NotNull final String hash, @NotNull final SRunningBuild build);
   }
 
   @NotNull
@@ -55,24 +55,29 @@ public class ChangeStatusUpdater {
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
 
     return new Handler() {
-      @NotNull
-      private GitHubChangeState resolveState(@NotNull final SRunningBuild build) {
-        if (!build.isFinished()) return GitHubChangeState.Pending;
-        StatusDescriptor status = build.getStatusDescriptor();
-        return status.isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
+
+      public void scheduleChangeStarted(@NotNull String hash, @NotNull SRunningBuild build) {
+        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " started", GitHubChangeState.Pending);
       }
 
-      public void scheduleChangeUpdate(@NotNull final String hash, @NotNull final SRunningBuild build) {
+      public void scheduleChangeCompeted(@NotNull String hash, @NotNull SRunningBuild build) {
+        GitHubChangeState status = build.getStatusDescriptor().isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
+        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " finished", status);
+      }
+
+      private void scheduleChangeUpdate(@NotNull final String hash,
+                                        @NotNull final SRunningBuild build,
+                                        @NotNull final String message,
+                                        @NotNull final GitHubChangeState status) {
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
           public void run() {
             try {
-
               api.setChangeStatus(
                       repositoryName,
                       hash,
-                      resolveState(build),
+                      status,
                       myWeb.getViewResultsUrl(build),
-                      build.getStatusDescriptor().getText()
+                      message
               );
 
             } catch (IOException e) {
