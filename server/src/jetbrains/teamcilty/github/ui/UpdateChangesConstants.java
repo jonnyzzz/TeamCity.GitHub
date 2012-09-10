@@ -27,4 +27,5 @@ public class UpdateChangesConstants {
   public String getUserNameKey() { return "guthub_username"; }
   public String getPasswordKey() { return Constants.SECURE_PROPERTY_PREFIX + "guthub_username"; }
   public String getRepositoryNameKey() { return "guthub_repo"; }
+  public String getRepositoryOwnerKey() { return "guthub_owner"; }
 }

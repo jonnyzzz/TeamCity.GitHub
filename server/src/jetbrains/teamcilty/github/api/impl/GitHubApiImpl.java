@@ -57,9 +57,10 @@ public class GitHubApiImpl implements GitHubApi {
     myPassword = password;
   }
 
-  public String readChangeStatus(@NotNull final String repoName,
+  public String readChangeStatus(@NotNull final String repoOwner,
+                                 @NotNull final String repoName,
                                  @NotNull final String hash) throws IOException {
-    HttpGet post = new HttpGet(getStatusUrl(repoName, hash));
+    final HttpGet post = new HttpGet(getStatusUrl(repoOwner, repoName, hash));
     try {
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
@@ -72,7 +73,7 @@ public class GitHubApiImpl implements GitHubApi {
   }
 
   @SuppressWarnings("UnusedDeclaration")
-  private class CommitStatus {
+  private static class CommitStatus {
     private String state;
     private String target_url;
     private String description;
@@ -95,13 +96,13 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  public void setChangeStatus(@NotNull final String repoName,
+  public void setChangeStatus(@NotNull final String repoOwner,
+                              @NotNull final String repoName,
                               @NotNull final String hash,
                               @NotNull final GitHubChangeState status,
                               @NotNull final String targetUrl,
                               @NotNull final String description) throws IOException {
-    String url = getStatusUrl(repoName, hash);
-    HttpPost post = new HttpPost(url);
+    final HttpPost post = new HttpPost(getStatusUrl(repoOwner, repoName, hash));
     try {
       post.setEntity(new GSonEntity(new CommitStatus(status.getState(), targetUrl, description)));
       post.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), post));
@@ -118,7 +119,9 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private String getStatusUrl(String repoName, String hash) {
-    return myUrl + "/repos/" + myUserName + "/" + repoName + "/statuses/" + hash;
+  private String getStatusUrl(@NotNull final String ownerName,
+                              @NotNull final String repoName,
+                              @NotNull final String hash) {
+    return myUrl + "/repos/" + ownerName + "/" + repoName + "/statuses/" + hash;
   }
 }

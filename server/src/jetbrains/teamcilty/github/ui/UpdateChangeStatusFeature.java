@@ -86,6 +86,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
         checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
+        checkNotEmpty(p, c.getRepositoryOwnerKey(), "Repository owner must be specified", result);
         checkNotEmpty(p, c.getServerKey(), "GitHub server api URL", result);
 
         return result;

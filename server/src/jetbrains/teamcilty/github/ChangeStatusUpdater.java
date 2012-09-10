@@ -68,6 +68,7 @@ public class ChangeStatusUpdater {
             feature.getParameters().get(c.getServerKey()),
             feature.getParameters().get(c.getUserNameKey()),
             feature.getParameters().get(c.getPasswordKey()));
+    final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
 
     return new Handler() {
@@ -89,6 +90,7 @@ public class ChangeStatusUpdater {
           public void run() {
             try {
               api.setChangeStatus(
+                      repositoryOwner,
                       repositoryName,
                       hash,
                       status,

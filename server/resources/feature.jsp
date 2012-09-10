@@ -21,6 +21,7 @@
 <tr>
   <td colspan="2">Specify GitHub repository name and credentials to push status updates to</td>
 </tr>
+<l:settingsGroup title="Authentication">
 <tr>
   <th>URL:<l:star/></th>
   <td>
@@ -45,6 +46,16 @@
     <span class="smallNote">Specify GitHub password</span>
   </td>
 </tr>
+</l:settingsGroup>
+<l:settingsGroup title="Repository">
+<tr>
+  <th>Owner:<l:star/></th>
+  <td>
+    <props:textProperty name="${keys.repositoryOwnerKey}" className="longField"/>
+    <span class="error" id="error_${keys.repositoryOwnerKey}"></span>
+    <span class="smallNote">Specify GitHub repository owner name (user or organization)</span>
+  </td>
+</tr>
 <tr>
   <th>Repository:<l:star/></th>
   <td>
@@ -53,4 +64,4 @@
     <span class="smallNote">Specify GitHub repository name to push change statuses to</span>
   </td>
 </tr>
-
+</l:settingsGroup>
