@@ -79,7 +79,7 @@ public class ChangeStatusUpdater {
 
       public void scheduleChangeCompeted(@NotNull String hash, @NotNull SRunningBuild build) {
         GitHubChangeState status = build.getStatusDescriptor().isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
-        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " finished", status);
+        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " finished:" + build.getStatusDescriptor().getText(), status);
       }
 
       private void scheduleChangeUpdate(@NotNull final String hash,
