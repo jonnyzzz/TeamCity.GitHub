@@ -74,12 +74,18 @@ public class ChangeStatusUpdater {
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull String hash, @NotNull SRunningBuild build) {
-        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " started", GitHubChangeState.Pending);
+        scheduleChangeUpdate(hash, build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
       }
 
       public void scheduleChangeCompeted(@NotNull String hash, @NotNull SRunningBuild build) {
         GitHubChangeState status = build.getStatusDescriptor().isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
-        scheduleChangeUpdate(hash, build, "Build " + build.getFullName() + " finished:" + build.getStatusDescriptor().getText(), status);
+        String text = build.getStatusDescriptor().getText();
+        if (text != null) {
+          text = ": " + text;
+        } else {
+          text = "";
+        }
+        scheduleChangeUpdate(hash, build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
       }
 
       private void scheduleChangeUpdate(@NotNull final String hash,
