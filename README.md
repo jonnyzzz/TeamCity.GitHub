@@ -18,6 +18,9 @@ http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatu
 
 To install plugin, put downloaded .zip file into `<TeamCity Data Directory>/plugins` folder and restart the server
 
+
+
+
 License
 =======
 Apache 2.0
