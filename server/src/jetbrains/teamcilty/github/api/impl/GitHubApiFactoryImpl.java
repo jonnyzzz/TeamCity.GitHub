@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package jetbrains.teamcilty.github.api.impl;
 
+import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
@@ -32,7 +33,7 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, @NotNull String password) {
-    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
+  public GitHubApi openGitHub(@NotNull final GitHubConnectionParameters connectionParameters) {
+    return new GitHubApiImpl(connectionParameters);
   }
 }

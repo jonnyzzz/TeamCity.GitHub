@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,12 @@ import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.ui.UpdateChangesConstants;
 import jetbrains.teamcilty.github.util.LoggerHelper;
+import org.eclipse.egit.github.core.CommitStatus;
+import org.eclipse.egit.github.core.RepositoryId;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -142,13 +145,20 @@ public class ChangeStatusUpdater {
     }
 
     final UpdateChangesConstants c = new UpdateChangesConstants();
-    final GitHubApi api = myFactory.openGitHub(
-            feature.getParameters().get(c.getServerKey()),
-            feature.getParameters().get(c.getUserNameKey()),
-            feature.getParameters().get(c.getPasswordKey()));
-    final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
-    final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
+
+    String url = feature.getParameters().get(c.getServerKey());
+    final String username = feature.getParameters().get(c.getUserNameKey());
+    final String password = feature.getParameters().get(c.getPasswordKey());
+
+//    url = GitHubConnectionParameters.getHost(url);
+
+    final GitHubApi api = myFactory.openGitHub(new GitHubConnectionParameters.Basic(url, username, password));
+
+    String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
+    String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));
+    final RepositoryId repository = new RepositoryId(repositoryOwner, repositoryName);
+
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
@@ -183,7 +193,7 @@ public class ChangeStatusUpdater {
             final String vcsBranch = version.getVcsBranch();
             if (vcsBranch != null && api.isPullRequestMergeBranch(vcsBranch)) {
               try {
-                final String hash = api.findPullRequestCommit(repositoryOwner, repositoryName, vcsBranch);
+                final String hash = api.findPullRequestCommit(repository, vcsBranch);
                 if (hash == null) {
                   throw new IOException("Failed to find head hash for commit from " + vcsBranch);
                 }
@@ -195,7 +205,7 @@ public class ChangeStatusUpdater {
                         "status: " + status);
                 return hash;
               } catch (IOException e) {
-                LOG.warn("Failed to find status update hash for " + vcsBranch + " for repository " + repositoryName);
+                LOG.warn("Failed to find status update hash for " + vcsBranch + " for repository " + repository);
               }
             }
             return version.getVersion();
@@ -204,26 +214,19 @@ public class ChangeStatusUpdater {
           public void run() {
             final String hash = resolveCommitHash();
             try {
-              api.setChangeStatus(
-                      repositoryOwner,
-                      repositoryName,
-                      hash,
-                      status,
-                      myWeb.getViewResultsUrl(build),
-                      message
-              );
+              final CommitStatus cs = new CommitStatus();
+              cs.setState(status.getState());
+              cs.setTargetUrl(myWeb.getViewResultsUrl(build));
+              cs.setDescription(message);
+              api.setChangeStatus(repository, hash, cs);
               LOG.info("Updated GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
             } catch (IOException e) {
               LOG.warn("Failed to update GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);
             }
             if (addComments) {
               try {
-                api.postComment(
-                        repositoryOwner,
-                        repositoryName,
-                        hash,
-                        getComment(version, build, status != GitHubChangeState.Pending, hash)
-                );
+                final String comment = getComment(version, build, status != GitHubChangeState.Pending, hash);
+                api.postComment(repository, hash, comment);
                 LOG.info("Added comment to GitHub commit: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
               } catch (IOException e) {
                 LOG.warn("Failed add GitHub comment for branch: " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);

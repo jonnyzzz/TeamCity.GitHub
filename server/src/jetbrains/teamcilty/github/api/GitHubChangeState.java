@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package jetbrains.teamcilty.github.api;
 
+import org.eclipse.egit.github.core.CommitStatus;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -23,10 +24,10 @@ import org.jetbrains.annotations.NotNull;
 * Date: 06.09.12 0:13
 */
 public enum GitHubChangeState {
-  Pending("pending"),
-  Success("success"),
-  Error("error"),
-  Failure("failure"),
+  Pending(CommitStatus.STATE_PENDING),
+  Success(CommitStatus.STATE_SUCCESS),
+  Error(CommitStatus.STATE_ERROR),
+  Failure(CommitStatus.STATE_FAILURE),
   ;
   private final String myState;
 
