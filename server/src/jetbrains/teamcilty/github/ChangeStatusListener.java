@@ -16,6 +16,7 @@
 
 package jetbrains.teamcilty.github;
 
+import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.vcs.VcsRootInstance;
@@ -32,6 +33,8 @@ import static jetbrains.teamcilty.github.ChangeStatusUpdater.Handler;
  * Date: 05.09.12 22:28
  */
 public class ChangeStatusListener {
+  private static final Logger LOG = Logger.getInstance(ChangeStatusListener.class.getName());
+
   @NotNull
   private final ChangeStatusUpdater myUpdater;
 
@@ -61,6 +64,10 @@ public class ChangeStatusListener {
       final Handler h = myUpdater.getUpdateHandler(feature);
 
       Map<VcsRootInstance, String> changes = getLatestChangesHash(build);
+      if (changes.isEmpty()) {
+        LOG.warn("No revisions were found to update GitHub status. Please check you have Git VCS roots in the build configuration");
+      }
+
       for (Map.Entry<VcsRootInstance, String> e : changes.entrySet()) {
         if (isStarting) {
           h.scheduleChangeStarted(e.getValue(), build);
@@ -76,6 +83,8 @@ public class ChangeStatusListener {
     final Map<VcsRootInstance, String> result = new HashMap<VcsRootInstance, String>();
     for (BuildRevision rev : build.getRevisions()) {
       if (!"jetbrains.git".equals(rev.getRoot().getVcsName())) continue;
+
+      LOG.debug("Found revision to report status to GitHub: " + rev.getRevision() + " from root " + rev.getRoot().getName());
       result.put(rev.getRoot(), rev.getRevision());
     }
     return result;

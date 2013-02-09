@@ -92,6 +92,8 @@ public class ChangeStatusUpdater {
                                         @NotNull final SRunningBuild build,
                                         @NotNull final String message,
                                         @NotNull final GitHubChangeState status) {
+        LOG.info("Scheduling GitHub status update for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
+
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
           public void run() {
             try {
@@ -103,9 +105,9 @@ public class ChangeStatusUpdater {
                       myWeb.getViewResultsUrl(build),
                       message
               );
-
+              LOG.info("Updated GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
             } catch (IOException e) {
-              LOG.warn("Failed to update change status for hash: " + hash + ". " + e.getMessage(), e);
+              LOG.warn("Failed to update GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);
             }
           }
         }));
