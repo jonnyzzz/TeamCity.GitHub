@@ -68,10 +68,12 @@ public class GitHubApiImpl implements GitHubApi {
   public String readChangeStatus(@NotNull final String repoOwner,
                                  @NotNull final String repoName,
                                  @NotNull final String hash) throws IOException {
-    final HttpGet post = new HttpGet(getStatusUrl(repoOwner, repoName, hash));
+    String requestUrl = getStatusUrl(repoOwner, repoName, hash);
+    final HttpGet post = new HttpGet(requestUrl);
     try {
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
+        logFailedRequest(requestUrl, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
       return "TBD";
@@ -133,7 +135,7 @@ public class GitHubApiImpl implements GitHubApi {
 
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(requestUrl, requestEntity, execute);
+        logFailedRequest(requestUrl, requestEntity.getText(), execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
     } catch (AuthenticationException e) {
@@ -143,17 +145,20 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private void logFailedRequest(@NotNull final String requestUrl,
-                                @NotNull final GSonEntity requestEntity,
-                                @NotNull final HttpResponse execute) throws IOException {
+  private void logFailedRequest(@NotNull String requestUrl,
+                                @Nullable String requestEntity,
+                                @NotNull HttpResponse execute) throws IOException {
     String responseText = extractResponseEntity(execute);
     if (responseText == null) {
       responseText = "<none>";
     }
+    if (requestEntity == null) {
+      requestEntity = "<none>";
+    }
 
     LOG.debug("Failed to complete query to GitHub with:\n" +
             "  requestURL: " + requestUrl + "\n" +
-            "  requestEntity: " + requestEntity.getText() + "\n" +
+            "  requestEntity: " + requestEntity + "\n" +
             "  response: " + execute.getStatusLine() + "\n" +
             "  responseEntity: " + responseText
     );
