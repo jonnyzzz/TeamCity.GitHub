@@ -47,6 +47,15 @@
   </td>
 </tr>
 </l:settingsGroup>
+<tr>
+  <td colspan="2">
+    <div class="attentionComment">
+      TeamCity Server URL<bs:help file="Configuring+Server+URL"/> will be used in GitHub status.
+      Make sure this URL is specified correctly. To change it use
+      <a href="<c:url value='/admin/admin.html?item=serverConfigGeneral'/>" target="_blank">Server Configuration page</a>.
+    </div>
+  </td>
+</tr>
 <l:settingsGroup title="Repository">
 <tr>
   <th>Owner:<l:star/></th>
