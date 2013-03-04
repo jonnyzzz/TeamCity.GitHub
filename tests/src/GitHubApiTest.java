@@ -114,4 +114,14 @@ public class GitHubApiTest extends BaseTestCase {
             "test status"
     );
   }
+
+  @Test(expectedExceptions = IOException.class)
+  public void test_set_status_failure() throws IOException, AuthenticationException {
+    enableDebug();
+    myApi.setChangeStatus(myRepoOwner, myRepoName, "wrong_hash",
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status"
+    );
+  }
 }
