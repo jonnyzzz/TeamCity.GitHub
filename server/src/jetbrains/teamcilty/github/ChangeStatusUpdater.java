@@ -76,7 +76,7 @@ public class ChangeStatusUpdater {
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
-        scheduleChangeUpdate(version.getVersion(), build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
+        scheduleChangeUpdate(version, build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
       }
 
       public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
@@ -87,17 +87,46 @@ public class ChangeStatusUpdater {
         } else {
           text = "";
         }
-        scheduleChangeUpdate(version.getVersion(), build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
+        scheduleChangeUpdate(version, build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
       }
 
-      private void scheduleChangeUpdate(@NotNull final String hash,
+      private void scheduleChangeUpdate(@NotNull final RepositoryVersion version,
                                         @NotNull final SRunningBuild build,
                                         @NotNull final String message,
                                         @NotNull final GitHubChangeState status) {
-        LOG.info("Scheduling GitHub status update for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
+        LOG.info("Scheduling GitHub status update for " +
+                "hash: " + version.getVersion() + ", " +
+                "branch: " + version.getVcsBranch()  + ", " +
+                "buildId: " + build.getBuildId() + ", " +
+                "status: " + status);
 
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
+
+          @NotNull
+          private String resolveCommitHash() {
+            final String vcsBranch = version.getVcsBranch();
+            if (vcsBranch != null && api.isPullRequestMergeBranch(vcsBranch)) {
+              try {
+                final String hash = api.findPullRequestCommit(repositoryOwner, repositoryName, vcsBranch);
+                if (hash == null) {
+                  throw new IOException("Failed to find head hash for commit from " + vcsBranch);
+                }
+                LOG.info("Resolved GitHub change commit for " + vcsBranch + " to point to pull request head for " +
+                        "hash: " + version.getVersion() + ", " +
+                        "newHash: " + hash + ", " +
+                        "branch: " + version.getVcsBranch()  + ", " +
+                        "buildId: " + build.getBuildId() + ", " +
+                        "status: " + status);
+                return hash;
+              } catch (IOException e) {
+                LOG.warn("Failed to find status update hash for " + vcsBranch + " for repository " + repositoryName);
+              }
+            }
+            return version.getVersion();
+          }
+
           public void run() {
+            final String hash = resolveCommitHash();
             try {
               api.setChangeStatus(
                       repositoryOwner,
