@@ -21,6 +21,7 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.EventDispatcher;
 import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
+import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -33,7 +34,7 @@ import static jetbrains.teamcilty.github.ChangeStatusUpdater.Handler;
  * Date: 05.09.12 22:28
  */
 public class ChangeStatusListener {
-  private static final Logger LOG = Logger.getInstance(ChangeStatusListener.class.getName());
+  private static final Logger LOG = LoggerHelper.getInstance(ChangeStatusListener.class);
 
   @NotNull
   private final ChangeStatusUpdater myUpdater;

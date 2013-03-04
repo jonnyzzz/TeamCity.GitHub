@@ -27,6 +27,7 @@ import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.ui.UpdateChangesConstants;
+import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -37,7 +38,7 @@ import java.util.concurrent.ExecutorService;
  * Date: 06.09.12 3:29
  */
 public class ChangeStatusUpdater {
-  private static final Logger LOG = Logger.getInstance(ChangeStatusUpdater.class.getName());
+  private static final Logger LOG = LoggerHelper.getInstance(ChangeStatusUpdater.class);
 
   private final ExecutorService myExecutor;
   @NotNull

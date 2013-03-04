@@ -21,6 +21,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -45,7 +46,7 @@ import java.net.HttpURLConnection;
  * Date: 05.09.12 23:39
  */
 public class GitHubApiImpl implements GitHubApi {
-  private static final Logger LOG = Logger.getInstance(GitHubApiImpl.class.getName());
+  private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
 
   @NotNull
   private final HttpClientWrapper myClient;
