@@ -21,6 +21,9 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.api.impl.data.CommitStatus;
+import jetbrains.teamcilty.github.api.impl.data.PullRequestInfo;
+import jetbrains.teamcilty.github.api.impl.data.RepoInfo;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -29,7 +32,6 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
@@ -82,53 +84,6 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  @SuppressWarnings("UnusedDeclaration")
-  private static class CommitStatus {
-    private String state;
-    private String target_url;
-    private String description;
-
-    private CommitStatus(String state, String target_url, String description) {
-      this.state = state;
-      this.target_url = target_url;
-      this.description = description;
-    }
-  }
-
-  private static class PullRequestInfo {
-    public RepoInfo head;
-    public RepoInfo base;
-  }
-
-  private static class RepoInfo {
-    private String label;
-    private String ref;
-    private String sha;
-  }
-
-  @NotNull
-  private String serializeGSon(@Nullable Object o) {
-    return o == null ? "" : myGson.toJson(o);
-  }
-
-  private class GSonEntity extends StringEntity {
-    @NotNull
-    private final String myText;
-
-    private GSonEntity(@NotNull final Object object) throws UnsupportedEncodingException {
-      this(serializeGSon(object));
-    }
-
-    private GSonEntity(@NotNull final String text) throws UnsupportedEncodingException {
-      super(text, "application/json", "UTF-8");
-      myText = text;
-    }
-
-    @NotNull
-    private String getText() {
-      return myText;
-    }
-  }
 
   public void setChangeStatus(@NotNull final String repoOwner,
                               @NotNull final String repoName,
@@ -137,7 +92,7 @@ public class GitHubApiImpl implements GitHubApi {
                               @NotNull final String targetUrl,
                               @NotNull final String description) throws IOException {
     final String requestUrl = getStatusUrl(repoOwner, repoName, hash);
-    final GSonEntity requestEntity = new GSonEntity(new CommitStatus(status.getState(), targetUrl, description));
+    final GSonEntity requestEntity = new GSonEntity(myGson, new CommitStatus(status.getState(), targetUrl, description));
     final HttpPost post = new HttpPost(requestUrl);
     try {
       post.setEntity(requestEntity);
