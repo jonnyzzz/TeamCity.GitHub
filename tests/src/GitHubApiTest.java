@@ -23,6 +23,7 @@ import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
 import jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl;
 import org.apache.http.auth.AuthenticationException;
 import org.jetbrains.annotations.NotNull;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -113,6 +114,26 @@ public class GitHubApiTest extends BaseTestCase {
             "http://teamcity.jetbrains.com",
             "test status"
     );
+  }
+
+  @Test
+  public void test_resolve_pull_request() throws IOException {
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    System.out.println(hash);
+    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+  }
+
+  @Test
+  public void test_resolve_pull_request_2() throws IOException {
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/head");
+    System.out.println(hash);
+    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+  }
+
+  @Test
+  public void test_is_merge_pull() {
+    Assert.assertTrue(myApi.isPullRequestMergeBranch("refs/pull/42/merge"));
+    Assert.assertFalse(myApi.isPullRequestMergeBranch("refs/pull/42/head"));
   }
 
   @Test(expectedExceptions = IOException.class)

@@ -36,10 +36,10 @@ import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.HttpURLConnection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -95,6 +95,17 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
+  private static class PullRequestInfo {
+    public RepoInfo head;
+    public RepoInfo base;
+  }
+
+  private static class RepoInfo {
+    private String label;
+    private String ref;
+    private String sha;
+  }
+
   @NotNull
   private String serializeGSon(@Nullable Object o) {
     return o == null ? "" : myGson.toJson(o);
@@ -142,6 +153,72 @@ public class GitHubApiImpl implements GitHubApi {
       throw new IOException(e);
     } finally {
       post.abort();
+    }
+  }
+
+  private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
+
+  public boolean isPullRequestMergeBranch(@NotNull String branchName) {
+    final Matcher match = PULL_REQUEST_BRANCH.matcher(branchName);
+    return match.matches() && "merge".equals(match.group(2));
+  }
+
+  @Nullable
+  public String findPullRequestCommit(@NotNull String repoOwner,
+                                      @NotNull String repoName,
+                                      @NotNull String branchName) throws IOException {
+
+    final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
+    if (!matcher.matches()) {
+      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not look like pull request");
+      return null;
+    }
+
+    final String pullRequestId = matcher.group(1);
+    if (pullRequestId == null) {
+      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not contain pull request id");
+      return null;
+    }
+
+    //  /repos/:owner/:repo/pulls/:number
+
+    final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/pulls/" + pullRequestId;
+    final HttpGet get = new HttpGet(requestUrl);
+    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
+    try {
+      final HttpResponse execute = myClient.execute(get);
+      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
+        logFailedRequest(requestUrl, null, execute);
+        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
+      }
+
+      final HttpEntity entity = execute.getEntity();
+      if (entity == null) {
+        logFailedRequest(requestUrl, null, execute);
+        throw new IOException("Failed to complete request to GitHub. Empty response. Status: " + execute.getStatusLine());
+      }
+
+      try {
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        entity.writeTo(bos);
+        final String json = bos.toString("utf-8");
+        LOG.debug("Parsing json for " + requestUrl + ": " + json);
+        final PullRequestInfo pullRequestInfo = myGson.fromJson(json, PullRequestInfo.class);
+
+        final RepoInfo head = pullRequestInfo.head;
+        if (head != null) {
+          return head.sha;
+        }
+
+        return null;
+      } finally {
+        EntityUtils.consume(entity);
+      }
+
+    } finally {
+      get.abort();
     }
   }
 

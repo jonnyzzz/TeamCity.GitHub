@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -35,4 +36,31 @@ public interface GitHubApi {
                        @NotNull GitHubChangeState status,
                        @NotNull String targetUrl,
                        @NotNull String description) throws IOException;
+
+
+  /**
+   * checks if specified branch represents GitHub pull request merge branch,
+   * i.e. /refs/pull/X/merge
+   * @param branchName branch name
+   * @return true if branch is pull's merge
+   */
+  boolean isPullRequestMergeBranch(@NotNull String branchName);
+
+  /**
+   * this method parses branch name and attempts to detect
+   * /refs/pull/X/head revision for given branch
+   *
+   * The main use-case for it is to resolve /refs/pull/X/merge branch
+   * into head commit hash in order to call github status API
+   *
+   * @param repoOwner repository owner name (who owns repo where you see pull request)
+   * @param repoName repository name (where you see pull request)
+   * @param branchName detected branch name in TeamCity, i.e. /refs/pull/X/merge
+   * @return found /refs/pull/X/head or null
+   * @throws IOException on communication error
+   */
+  @Nullable
+  String findPullRequestCommit(@NotNull String repoOwner,
+                               @NotNull String repoName,
+                               @NotNull String branchName) throws IOException;
 }
