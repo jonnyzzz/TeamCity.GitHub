@@ -29,6 +29,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -144,5 +145,12 @@ public class GitHubApiTest extends BaseTestCase {
             "http://teamcity.jetbrains.com",
             "test status"
     );
+  }
+
+  @Test
+  public void test_parent_hashes() throws IOException {
+    enableDebug();
+    Collection<String> parents = myApi.getCommitParents(myRepoOwner, myRepoName, "4664d7fa1b9fa71ea7c7958c126a05ea5d0d64f9");
+    System.out.println(parents);
   }
 }

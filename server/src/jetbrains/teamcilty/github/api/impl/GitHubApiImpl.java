@@ -21,6 +21,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.api.impl.data.CommitInfo;
 import jetbrains.teamcilty.github.api.impl.data.CommitStatus;
 import jetbrains.teamcilty.github.api.impl.data.PullRequestInfo;
 import jetbrains.teamcilty.github.api.impl.data.RepoInfo;
@@ -32,14 +33,21 @@ import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -141,8 +149,45 @@ public class GitHubApiImpl implements GitHubApi {
     final HttpGet get = new HttpGet(requestUrl);
     get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
     get.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
+
+    final PullRequestInfo pullRequestInfo = processResponse(get, PullRequestInfo.class);
+
+    final RepoInfo head = pullRequestInfo.head;
+    if (head != null) {
+      return head.sha;
+    }
+    return null;
+  }
+
+  @NotNull
+  public Collection<String> getCommitParents(@NotNull String repoOwner, @NotNull String repoName, @NotNull String hash) throws IOException {
+    // /repos/:owner/:repo/git/commits/:sha
+    final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/git/commits/" + hash;
+    final HttpGet get = new HttpGet(requestUrl);
+
+    final CommitInfo infos = processResponse(get, CommitInfo.class);
+    if (infos.parents != null) {
+      final Set<String> parents = new HashSet<String>();
+      for (CommitInfo p : infos.parents) {
+        String sha = p.sha;
+        if (sha != null) {
+          parents.add(sha);
+        }
+      }
+      return parents;
+    }
+    return Collections.emptyList();
+  }
+
+
+  @NotNull
+  private <T> T processResponse(@NotNull HttpUriRequest request, @NotNull final Class<T> clazz) throws IOException {
+    // /repos/:owner/:repo/git/commits/:sha
+    final String requestUrl = request.getURI().toString();
+    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
     try {
-      final HttpResponse execute = myClient.execute(get);
+      final HttpResponse execute = myClient.execute(request);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
         logFailedRequest(requestUrl, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
@@ -155,27 +200,19 @@ public class GitHubApiImpl implements GitHubApi {
       }
 
       try {
-
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         entity.writeTo(bos);
         final String json = bos.toString("utf-8");
         LOG.debug("Parsing json for " + requestUrl + ": " + json);
-        final PullRequestInfo pullRequestInfo = myGson.fromJson(json, PullRequestInfo.class);
-
-        final RepoInfo head = pullRequestInfo.head;
-        if (head != null) {
-          return head.sha;
-        }
-
-        return null;
+        return myGson.fromJson(json, clazz);
       } finally {
         EntityUtils.consume(entity);
       }
-
     } finally {
-      get.abort();
+      request.abort();
     }
   }
+
 
   private void logFailedRequest(@NotNull String requestUrl,
                                 @Nullable String requestEntity,

@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -63,4 +64,17 @@ public interface GitHubApi {
   String findPullRequestCommit(@NotNull String repoOwner,
                                @NotNull String repoName,
                                @NotNull String branchName) throws IOException;
+
+  /**
+   * return parent commits for given commit
+   * @param repoOwner repo owner
+   * @param repoName repo name
+   * @param hash commit hash
+   * @return colleciton of commit parents
+   * @throws IOException
+   */
+  @NotNull
+  Collection<String> getCommitParents(@NotNull String repoOwner,
+                                      @NotNull String repoName,
+                                      @NotNull String hash) throws IOException;
 }
