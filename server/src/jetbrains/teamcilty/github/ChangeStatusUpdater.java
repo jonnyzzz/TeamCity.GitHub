@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github;
 
 import com.intellij.openapi.diagnostic.Logger;
+import jetbrains.buildServer.serverSide.RepositoryVersion;
 import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SRunningBuild;
 import jetbrains.buildServer.serverSide.WebLinks;
@@ -54,8 +55,8 @@ public class ChangeStatusUpdater {
   }
 
   public static interface Handler {
-    void scheduleChangeStarted(@NotNull final String hash, @NotNull final SRunningBuild build);
-    void scheduleChangeCompeted(@NotNull final String hash, @NotNull final SRunningBuild build);
+    void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 
   @NotNull
@@ -74,11 +75,11 @@ public class ChangeStatusUpdater {
 
     return new Handler() {
 
-      public void scheduleChangeStarted(@NotNull String hash, @NotNull SRunningBuild build) {
-        scheduleChangeUpdate(hash, build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
+      public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
+        scheduleChangeUpdate(version.getVersion(), build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
       }
 
-      public void scheduleChangeCompeted(@NotNull String hash, @NotNull SRunningBuild build) {
+      public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         GitHubChangeState status = build.getStatusDescriptor().isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
         String text = build.getStatusDescriptor().getText();
         if (text != null) {
@@ -86,7 +87,7 @@ public class ChangeStatusUpdater {
         } else {
           text = "";
         }
-        scheduleChangeUpdate(hash, build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
+        scheduleChangeUpdate(version.getVersion(), build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
       }
 
       private void scheduleChangeUpdate(@NotNull final String hash,

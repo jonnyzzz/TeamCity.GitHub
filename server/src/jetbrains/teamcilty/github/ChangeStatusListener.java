@@ -19,13 +19,12 @@ package jetbrains.teamcilty.github;
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.util.EventDispatcher;
-import jetbrains.buildServer.vcs.VcsRootInstance;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import static jetbrains.teamcilty.github.ChangeStatusUpdater.Handler;
 
@@ -64,29 +63,29 @@ public class ChangeStatusListener {
 
       final Handler h = myUpdater.getUpdateHandler(feature);
 
-      Map<VcsRootInstance, String> changes = getLatestChangesHash(build);
+      final Collection<BuildRevision> changes = getLatestChangesHash(build);
       if (changes.isEmpty()) {
         LOG.warn("No revisions were found to update GitHub status. Please check you have Git VCS roots in the build configuration");
       }
 
-      for (Map.Entry<VcsRootInstance, String> e : changes.entrySet()) {
+      for (BuildRevision e : changes) {
         if (isStarting) {
-          h.scheduleChangeStarted(e.getValue(), build);
+          h.scheduleChangeStarted(e.getRepositoryVersion(), build);
         } else {
-          h.scheduleChangeCompeted(e.getValue(), build);
+          h.scheduleChangeCompeted(e.getRepositoryVersion(), build);
         }
       }
     }
   }
 
   @NotNull
-  private Map<VcsRootInstance, String> getLatestChangesHash(@NotNull final SRunningBuild build) {
-    final Map<VcsRootInstance, String> result = new HashMap<VcsRootInstance, String>();
+  private Collection<BuildRevision> getLatestChangesHash(@NotNull final SRunningBuild build) {
+    final Collection<BuildRevision> result = new ArrayList<BuildRevision>();
     for (BuildRevision rev : build.getRevisions()) {
       if (!"jetbrains.git".equals(rev.getRoot().getVcsName())) continue;
 
-      LOG.debug("Found revision to report status to GitHub: " + rev.getRevision() + " from root " + rev.getRoot().getName());
-      result.put(rev.getRoot(), rev.getRevision());
+      LOG.debug("Found revision to report status to GitHub: " + rev.getRevision() + ", branch: " + rev.getRepositoryVersion().getVcsBranch() + " from root " + rev.getRoot().getName());
+      result.add(rev);
     }
     return result;
   }
