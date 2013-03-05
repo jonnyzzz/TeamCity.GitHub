@@ -27,6 +27,7 @@ import jetbrains.teamcilty.github.api.impl.data.RepoInfo;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -38,7 +39,9 @@ import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,6 +75,9 @@ public class GitHubApiImpl implements GitHubApi {
                                  @NotNull final String hash) throws IOException {
     String requestUrl = getStatusUrl(repoOwner, repoName, hash);
     final HttpGet post = new HttpGet(requestUrl);
+    includeAuthentication(post);
+    post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+
     try {
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
@@ -84,7 +90,6 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-
   public void setChangeStatus(@NotNull final String repoOwner,
                               @NotNull final String repoName,
                               @NotNull final String hash,
@@ -96,7 +101,7 @@ public class GitHubApiImpl implements GitHubApi {
     final HttpPost post = new HttpPost(requestUrl);
     try {
       post.setEntity(requestEntity);
-      post.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), post));
+      includeAuthentication(post);
       post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
 
       final HttpResponse execute = myClient.execute(post);
@@ -104,8 +109,6 @@ public class GitHubApiImpl implements GitHubApi {
         logFailedRequest(requestUrl, requestEntity.getText(), execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
-    } catch (AuthenticationException e) {
-      throw new IOException(e);
     } finally {
       post.abort();
     }
@@ -139,8 +142,8 @@ public class GitHubApiImpl implements GitHubApi {
 
     final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/pulls/" + pullRequestId;
     final HttpGet get = new HttpGet(requestUrl);
-    get.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), get));
-    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));    
+    includeAuthentication(get);
+    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
     get.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
     try {
       final HttpResponse execute = myClient.execute(get);
@@ -175,6 +178,14 @@ public class GitHubApiImpl implements GitHubApi {
 
     } finally {
       get.abort();
+    }
+  }
+
+  private void includeAuthentication(@NotNull HttpRequest request) throws IOException {
+    try {
+      request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), request));
+    } catch (AuthenticationException e) {
+      throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
     }
   }
 
