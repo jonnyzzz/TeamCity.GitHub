@@ -139,7 +139,8 @@ public class GitHubApiImpl implements GitHubApi {
 
     final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/pulls/" + pullRequestId;
     final HttpGet get = new HttpGet(requestUrl);
-    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+    get.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), get));
+    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));    
     get.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
     try {
       final HttpResponse execute = myClient.execute(get);
