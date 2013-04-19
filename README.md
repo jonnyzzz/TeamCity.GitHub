@@ -16,8 +16,9 @@ Download
 I set up TeamCity build configuration for it. Fresh builds are downloadable from 
 http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv
 
-To install plugin, put downloaded .zip file into `<TeamCity Data Directory>/plugins` folder and restart the server
+To install plugin, put downloaded ```.zip``` file into `<TeamCity Data Directory>/plugins` folder and restart the server
 
+**NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`).
 
 
 
