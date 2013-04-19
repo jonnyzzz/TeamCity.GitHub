@@ -27,7 +27,12 @@
   <td>
     <props:textProperty name="${keys.serverKey}" className="longField"/>
     <span class="error" id="error_${keys.serverKey}"></span>
-    <span class="smallNote">Specify GitHub instance URL</span>
+    <span class="smallNote">
+      Specify GitHub instance URL.
+      <br/>
+      Use <strong>http(s)://[hostname]/api/v3</strong>
+      for <a href="https://support.enterprise.github.com/entries/21391237-Using-the-API" target="_blank">GitHub Enterprise</a>
+    </span>
   </td>
 </tr>
 <tr>

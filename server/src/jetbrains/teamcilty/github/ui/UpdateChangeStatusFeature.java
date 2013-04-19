@@ -70,13 +70,15 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   public PropertiesProcessor getParametersProcessor() {
     final UpdateChangesConstants c = new UpdateChangesConstants();
     return new PropertiesProcessor() {
-      private void checkNotEmpty(@NotNull final Map<String, String> properties,
+      private boolean checkNotEmpty(@NotNull final Map<String, String> properties,
                                  @NotNull final String key,
                                  @NotNull final String message,
                                  @NotNull final Collection<InvalidProperty> res) {
         if (StringUtil.isEmptyOrSpaces(properties.get(key))) {
           res.add(new InvalidProperty(key, message));
+          return true;
         }
+        return false;
       }
 
       @NotNull
@@ -88,7 +90,13 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
         checkNotEmpty(p, c.getRepositoryOwnerKey(), "Repository owner must be specified", result);
-        checkNotEmpty(p, c.getServerKey(), "GitHub server api URL", result);
+
+        if (!checkNotEmpty(p, c.getServerKey(), "GitHub api URL", result)) {
+          final String url = "" + p.get(c.getServerKey());
+          if (!(url.startsWith("http://") || url.startsWith("https://"))) {
+            result.add(new InvalidProperty(c.getServerKey(), "GitHub api URL should start with http:// or https://"));
+          }
+        }
 
         return result;
       }
