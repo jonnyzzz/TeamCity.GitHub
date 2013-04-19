@@ -19,6 +19,7 @@ package jetbrains.teamcilty.github.ui;
 import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -73,7 +74,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
                                  @NotNull final String key,
                                  @NotNull final String message,
                                  @NotNull final Collection<InvalidProperty> res) {
-        if (jetbrains.buildServer.util.StringUtil.isEmptyOrSpaces(properties.get(key))) {
+        if (StringUtil.isEmptyOrSpaces(properties.get(key))) {
           res.add(new InvalidProperty(key, message));
         }
       }
