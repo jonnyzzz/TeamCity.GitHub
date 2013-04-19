@@ -62,16 +62,16 @@ public class GitHubApiImpl implements GitHubApi {
   @NotNull
   private final HttpClientWrapper myClient;
   private final Gson myGson = new Gson();
-  private final String myUrl;
+  private final GitHubApiPaths myUrls;
   private final String myUserName;
   private final String myPassword;
 
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
-                       @NotNull final String url,
+                       @NotNull final GitHubApiPaths urls,
                        @NotNull final String userName,
                        @NotNull final String password) {
     myClient = client;
-    myUrl = url;
+    myUrls = urls;
     myUserName = userName;
     myPassword = password;
   }
@@ -79,15 +79,14 @@ public class GitHubApiImpl implements GitHubApi {
   public String readChangeStatus(@NotNull final String repoOwner,
                                  @NotNull final String repoName,
                                  @NotNull final String hash) throws IOException {
-    String requestUrl = getStatusUrl(repoOwner, repoName, hash);
-    final HttpGet post = new HttpGet(requestUrl);
+    final HttpGet post = new HttpGet(myUrls.getStatusUrl(repoOwner, repoName, hash));
     includeAuthentication(post);
     post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
 
     try {
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(requestUrl, null, execute);
+        logFailedRequest(post, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
       return "TBD";
@@ -102,9 +101,8 @@ public class GitHubApiImpl implements GitHubApi {
                               @NotNull final GitHubChangeState status,
                               @NotNull final String targetUrl,
                               @NotNull final String description) throws IOException {
-    final String requestUrl = getStatusUrl(repoOwner, repoName, hash);
     final GSonEntity requestEntity = new GSonEntity(myGson, new CommitStatus(status.getState(), targetUrl, description));
-    final HttpPost post = new HttpPost(requestUrl);
+    final HttpPost post = new HttpPost(myUrls.getStatusUrl(repoOwner, repoName, hash));
     try {
       post.setEntity(requestEntity);
       includeAuthentication(post);
@@ -112,7 +110,7 @@ public class GitHubApiImpl implements GitHubApi {
 
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(requestUrl, requestEntity.getText(), execute);
+        logFailedRequest(post, requestEntity.getText(), execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
     } finally {
@@ -146,7 +144,7 @@ public class GitHubApiImpl implements GitHubApi {
 
     //  /repos/:owner/:repo/pulls/:number
 
-    final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/pulls/" + pullRequestId;
+    final String requestUrl = myUrls.getPullRequestInfo(repoOwner, repoName, pullRequestId);
     final HttpGet get = new HttpGet(requestUrl);
     includeAuthentication(get);
     get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
@@ -163,8 +161,8 @@ public class GitHubApiImpl implements GitHubApi {
 
   @NotNull
   public Collection<String> getCommitParents(@NotNull String repoOwner, @NotNull String repoName, @NotNull String hash) throws IOException {
-    // /repos/:owner/:repo/git/commits/:sha
-    final String requestUrl = myUrl + "/repos/" + repoOwner + "/" + repoName + "/git/commits/" + hash;
+
+    final String requestUrl = myUrls.getCommitInfo(repoOwner, repoName, hash);
     final HttpGet get = new HttpGet(requestUrl);
 
     final CommitInfo infos = processResponse(get, CommitInfo.class);
@@ -181,23 +179,20 @@ public class GitHubApiImpl implements GitHubApi {
     return Collections.emptyList();
   }
 
-
   @NotNull
   private <T> T processResponse(@NotNull HttpUriRequest request, @NotNull final Class<T> clazz) throws IOException {
-    // /repos/:owner/:repo/git/commits/:sha
-    final String requestUrl = request.getURI().toString();
     request.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
     request.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
     try {
       final HttpResponse execute = myClient.execute(request);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(requestUrl, null, execute);
+        logFailedRequest(request, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
 
       final HttpEntity entity = execute.getEntity();
       if (entity == null) {
-        logFailedRequest(requestUrl, null, execute);
+        logFailedRequest(request, null, execute);
         throw new IOException("Failed to complete request to GitHub. Empty response. Status: " + execute.getStatusLine());
       }
 
@@ -205,7 +200,7 @@ public class GitHubApiImpl implements GitHubApi {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         entity.writeTo(bos);
         final String json = bos.toString("utf-8");
-        LOG.debug("Parsing json for " + requestUrl + ": " + json);
+        LOG.debug("Parsing json for " + request.getURI().toString() + ": " + json);
         return myGson.fromJson(json, clazz);
       } finally {
         EntityUtils.consume(entity);
@@ -223,7 +218,7 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private void logFailedRequest(@NotNull String requestUrl,
+  private void logFailedRequest(@NotNull HttpUriRequest requestUrl,
                                 @Nullable String requestEntity,
                                 @NotNull HttpResponse execute) throws IOException {
     String responseText = extractResponseEntity(execute);
@@ -235,7 +230,8 @@ public class GitHubApiImpl implements GitHubApi {
     }
 
     LOG.debug("Failed to complete query to GitHub with:\n" +
-            "  requestURL: " + requestUrl + "\n" +
+            "  requestURL: " + requestUrl.getURI().toString() + "\n" +
+            "  requestMethod: " + requestUrl.getMethod() + "\n" +
             "  requestEntity: " + requestEntity + "\n" +
             "  response: " + execute.getStatusLine() + "\n" +
             "  responseEntity: " + responseText
@@ -258,11 +254,5 @@ public class GitHubApiImpl implements GitHubApi {
     } finally {
       EntityUtils.consume(responseEntity);
     }
-  }
-
-  private String getStatusUrl(@NotNull final String ownerName,
-                              @NotNull final String repoName,
-                              @NotNull final String hash) {
-    return myUrl + "/repos/" + ownerName + "/" + repoName + "/statuses/" + hash;
   }
 }

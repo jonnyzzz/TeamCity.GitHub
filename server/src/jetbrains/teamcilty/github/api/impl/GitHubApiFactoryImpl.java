@@ -33,6 +33,6 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
 
   @NotNull
   public GitHubApi openGitHub(@NotNull String url, @NotNull String username, @NotNull String password) {
-    return new GitHubApiImpl(myWrapper, url, username, password);
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
   }
 }

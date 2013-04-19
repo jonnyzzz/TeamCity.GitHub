@@ -20,6 +20,7 @@ import jetbrains.buildServer.util.PropertiesUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
+import jetbrains.teamcilty.github.api.impl.GitHubApiPaths;
 import jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl;
 import org.apache.http.auth.AuthenticationException;
 import org.jetbrains.annotations.NotNull;
@@ -59,7 +60,7 @@ public class GitHubApiTest extends BaseTestCase {
 
     myApi = new GitHubApiImpl(
             new HttpClientWrapperImpl(),
-            ps.getProperty(URL),
+            new GitHubApiPaths(ps.getProperty(URL)),
             user,
             rewind(ps.getProperty(PASSWORD_REV)));
   }
