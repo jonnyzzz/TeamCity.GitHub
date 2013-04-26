@@ -10,6 +10,7 @@ https://github.com/blog/1227-commit-status-api
 Plugin is descibed in one of the following blog posts
 - http://blog.jonnyzzz.name/2012/09/reporting-change-status-to-github.html
 - http://blog.jonnyzzz.name/2012/09/github-status-api-in-teamcity-update.html
+- http://blog.jonnyzzz.name/2013/04/github-change-status-on-branches.html
 
 Download
 ========
