@@ -16,15 +16,21 @@
 
 package jetbrains.teamcilty.github.api.impl;
 
+import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.version.ServerVersionHolder;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.RequestAcceptEncoding;
 import org.apache.http.client.protocol.ResponseContentEncoding;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.DefaultHttpRequestRetryHandler;
 import org.apache.http.impl.conn.ProxySelectorRoutePlanner;
+import org.apache.http.impl.conn.SchemeRegistryFactory;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpConnectionParams;
@@ -34,6 +40,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.ProxySelector;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -42,7 +54,7 @@ import java.net.ProxySelector;
 public class HttpClientWrapperImpl implements HttpClientWrapper {
   private final HttpClient myClient;
 
-  public HttpClientWrapperImpl() {
+  public HttpClientWrapperImpl() throws UnrecoverableKeyException, NoSuchAlgorithmException, KeyStoreException, KeyManagementException {
     final String serverVersion = ServerVersionHolder.getVersion().getDisplayVersion();
 
     final HttpParams ps = new BasicHttpParams();
@@ -52,7 +64,15 @@ public class HttpClientWrapperImpl implements HttpClientWrapper {
     HttpConnectionParams.setSoTimeout(ps, 300 * 1000);
     HttpProtocolParams.setUserAgent(ps, "JetBrains TeamCity " + serverVersion);
 
-    DefaultHttpClient httpclient = new DefaultHttpClient(new ThreadSafeClientConnManager(), ps);
+    final SchemeRegistry schemaRegistry = SchemeRegistryFactory.createDefault();
+    final SSLSocketFactory sslSocketFactory = new SSLSocketFactory(new TrustStrategy() {
+      public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+        return !TeamCityProperties.getBoolean("teamcity.github.verify.ssl.certificate");
+      }
+    });
+    schemaRegistry.register(new Scheme("https", 443, sslSocketFactory));
+
+    final DefaultHttpClient httpclient = new DefaultHttpClient(new ThreadSafeClientConnManager(schemaRegistry), ps);
 
     httpclient.setRoutePlanner(new ProxySelectorRoutePlanner(
             httpclient.getConnectionManager().getSchemeRegistry(),
