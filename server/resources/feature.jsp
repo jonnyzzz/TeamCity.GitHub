@@ -51,6 +51,15 @@
     <span class="smallNote">Specify GitHub password</span>
   </td>
 </tr>
+  <tr>
+  <th>Use comments:</th>
+  <td>
+    <props:checkboxProperty name="${keys.useCommentsKey}" className="longField"/>
+    <label for="${keys.useCommentsKey}">Comment pull request with build details</label>
+    <span class="error" id="error_${keys.useCommentsKey}"></span>
+    <span class="smallNote">Should comments be added on build change</span>
+  </td>
+</tr>
 </l:settingsGroup>
 <tr>
   <td colspan="2">

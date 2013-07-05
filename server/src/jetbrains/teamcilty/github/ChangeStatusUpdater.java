@@ -17,12 +17,11 @@
 package jetbrains.teamcilty.github;
 
 import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.serverSide.RepositoryVersion;
-import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
-import jetbrains.buildServer.serverSide.SRunningBuild;
-import jetbrains.buildServer.serverSide.WebLinks;
+import jetbrains.buildServer.messages.Status;
+import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.executors.ExecutorServices;
 import jetbrains.buildServer.util.ExceptionUtil;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
@@ -32,6 +31,7 @@ import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -40,7 +40,6 @@ import java.util.concurrent.ExecutorService;
  */
 public class ChangeStatusUpdater {
   private static final Logger LOG = LoggerHelper.getInstance(ChangeStatusUpdater.class);
-
   private final ExecutorService myExecutor;
   @NotNull
   private final GitHubApiFactory myFactory;
@@ -54,9 +53,61 @@ public class ChangeStatusUpdater {
     myExecutor = services.getLowPriorityExecutorService();
   }
 
-  public static interface Handler {
-    void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
-    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+  private String getComment(@NotNull RepositoryVersion version,
+                            @NotNull SRunningBuild build,
+                            boolean completed,
+                            @NotNull String hash) {
+    StringBuilder comment = new StringBuilder("[Build ").append(build.getBuildNumber()).append("](").append(myWeb.getViewResultsUrl(build)).append(") ");
+    if (completed) {
+      comment.append("outcome was **").append(build.getStatusDescriptor().getStatus().getText()).append("**");
+    } else {
+      comment.append("is now running");
+    }
+    comment.append(" using a merge of ")
+            .append(hash)
+            .append("\n");
+    String text = build.getStatusDescriptor().getText();
+    if (completed && text != null) {
+      comment.append("Summary: ").append(text).append(" Build time: ").append(getFriendlyDuration(build.getDuration()));
+      if (build.getBuildStatus() != Status.NORMAL){
+        final List<STestRun> failedTests = build.getFullStatistics().getFailedTests();
+        if (!failedTests.isEmpty()) {
+          comment.append("\n### Failed tests\n");
+          comment.append("```\n");
+          for (int i = 0; i < failedTests.size(); i++) {
+            STestRun testRun = failedTests.get(i);
+            comment.append("").append(testRun.getTest().getName().toString()).append(": ");
+            comment.append(getFailureText(testRun.getFailureInfo())).append("\n\n");
+            if (i==10){
+              comment.append("\n##### there are ")
+                      .append(build.getFullStatistics().getFailedTestCount() - i)
+                      .append(" more failed tests, see build details\n");
+              break;
+            }
+          }
+          comment.append("```\n");
+        }
+      }
+    }
+
+    return comment.toString();
+  }
+
+  private static String getFriendlyDuration(long millis) {
+    long second = (millis / 1000) % 60;
+    long minute = (millis / (1000 * 60)) % 60;
+    long hour = (millis / (1000 * 60 * 60)) % 24;
+    return hour + ":" + minute + ":" + second;
+  }
+
+  private static String getFailureText(TestFailureInfo failureInfo) {
+    if (failureInfo == null) {
+      return "<no details avaliable>";
+    } else {
+      StringBuffer sb = new StringBuffer(failureInfo.getStacktraceMessage());
+      sb.append(failureInfo.getShortStacktrace());
+      return sb.toString();
+    }
   }
 
   @NotNull
@@ -72,7 +123,7 @@ public class ChangeStatusUpdater {
             feature.getParameters().get(c.getPasswordKey()));
     final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
-
+    final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
@@ -96,7 +147,7 @@ public class ChangeStatusUpdater {
                                         @NotNull final GitHubChangeState status) {
         LOG.info("Scheduling GitHub status update for " +
                 "hash: " + version.getVersion() + ", " +
-                "branch: " + version.getVcsBranch()  + ", " +
+                "branch: " + version.getVcsBranch() + ", " +
                 "buildId: " + build.getBuildId() + ", " +
                 "status: " + status);
 
@@ -114,7 +165,7 @@ public class ChangeStatusUpdater {
                 LOG.info("Resolved GitHub change commit for " + vcsBranch + " to point to pull request head for " +
                         "hash: " + version.getVersion() + ", " +
                         "newHash: " + hash + ", " +
-                        "branch: " + version.getVcsBranch()  + ", " +
+                        "branch: " + version.getVcsBranch() + ", " +
                         "buildId: " + build.getBuildId() + ", " +
                         "status: " + status);
                 return hash;
@@ -140,9 +191,28 @@ public class ChangeStatusUpdater {
             } catch (IOException e) {
               LOG.warn("Failed to update GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);
             }
+            if (addComments) {
+              try {
+                api.postComment(
+                        repositoryOwner,
+                        repositoryName,
+                        version.getVcsBranch(),
+                        getComment(version,build,status!=GitHubChangeState.Pending,hash)
+                );
+                LOG.info("Added comment to GitHub PR : " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status);
+              } catch (IOException e) {
+                LOG.warn("Failed add GitHub comment for branch: " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);
+              }
+            }
           }
         }));
       }
     };
+  }
+
+  public static interface Handler {
+    void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+
+    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 }

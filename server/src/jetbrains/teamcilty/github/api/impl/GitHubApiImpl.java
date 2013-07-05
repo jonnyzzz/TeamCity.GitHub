@@ -23,6 +23,7 @@ import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.data.CommitInfo;
 import jetbrains.teamcilty.github.api.impl.data.CommitStatus;
+import jetbrains.teamcilty.github.api.impl.data.IssueComment;
 import jetbrains.teamcilty.github.api.impl.data.PullRequestInfo;
 import jetbrains.teamcilty.github.api.impl.data.RepoInfo;
 import jetbrains.teamcilty.github.util.LoggerHelper;
@@ -53,12 +54,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
- * Date: 05.09.12 23:39
+ * @author Eugene Petrenko (eugene.petrenko@gmail.com)
+ * @author Tomaz Cerar
+ *         Date: 05.09.12 23:39
  */
 public class GitHubApiImpl implements GitHubApi {
   private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
-
+  private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
   @NotNull
   private final HttpClientWrapper myClient;
   private final Gson myGson = new Gson();
@@ -74,6 +76,22 @@ public class GitHubApiImpl implements GitHubApi {
     myUrls = urls;
     myUserName = userName;
     myPassword = password;
+  }
+
+  private static String getPullRequestId(@NotNull String repoName,
+                                         @NotNull String branchName) {
+    final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
+    if (!matcher.matches()) {
+      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not look like pull request");
+      return null;
+    }
+
+    final String pullRequestId = matcher.group(1);
+    if (pullRequestId == null) {
+      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not contain pull request id");
+      return null;
+    }
+    return pullRequestId;
   }
 
   public String readChangeStatus(@NotNull final String repoOwner,
@@ -118,8 +136,6 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
-
   public boolean isPullRequestMergeBranch(@NotNull String branchName) {
     final Matcher match = PULL_REQUEST_BRANCH.matcher(branchName);
     return match.matches() && "merge".equals(match.group(2));
@@ -130,17 +146,7 @@ public class GitHubApiImpl implements GitHubApi {
                                       @NotNull String repoName,
                                       @NotNull String branchName) throws IOException {
 
-    final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
-    if (!matcher.matches()) {
-      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not look like pull request");
-      return null;
-    }
-
-    final String pullRequestId = matcher.group(1);
-    if (pullRequestId == null) {
-      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not contain pull request id");
-      return null;
-    }
+    String pullRequestId = getPullRequestId(repoName, branchName);
 
     //  /repos/:owner/:repo/pulls/:number
 
@@ -253,6 +259,38 @@ public class GitHubApiImpl implements GitHubApi {
       }
     } finally {
       EntityUtils.consume(responseEntity);
+    }
+  }
+
+  private String getAddCommentUrl(@NotNull final String ownerName,
+                                  @NotNull final String repoName,
+                                  @NotNull final String hash) {
+
+    String pullRequestId = getPullRequestId(repoName, hash);
+    LOG.info("pull request ID: "+pullRequestId);
+    return myUrls.getAddCommentUrl(ownerName, repoName, pullRequestId);
+  }
+
+  public void postComment(@NotNull final String ownerName,
+                          @NotNull final String repoName,
+                          @NotNull final String hash,
+                          @NotNull final String comment) throws IOException {
+    LOG.debug("Posting: " + comment);
+    final String requestUrl = getAddCommentUrl(ownerName, repoName, hash);
+    final GSonEntity requestEntity = new GSonEntity(myGson, new IssueComment(comment));
+    final HttpPost post = new HttpPost(requestUrl);
+    try {
+      post.setEntity(requestEntity);
+      includeAuthentication(post);
+      post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+
+      final HttpResponse execute = myClient.execute(post);
+      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
+        logFailedRequest(post, requestEntity.getText(), execute);
+        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
+      }
+    } finally {
+      post.abort();
     }
   }
 }
