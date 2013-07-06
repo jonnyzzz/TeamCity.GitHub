@@ -52,12 +52,12 @@
   </td>
 </tr>
   <tr>
-  <th>Use comments:</th>
+  <th><label for="${keys.useCommentsKey}">Use comments:</label></th>
   <td>
     <props:checkboxProperty name="${keys.useCommentsKey}" className="longField"/>
     <label for="${keys.useCommentsKey}">Comment pull request with build details</label>
     <span class="error" id="error_${keys.useCommentsKey}"></span>
-    <span class="smallNote">Should comments be added on build change</span>
+    <span class="smallNote">Adds comments with build details to GitHub change</span>
   </td>
 </tr>
 </l:settingsGroup>
