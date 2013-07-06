@@ -59,8 +59,13 @@ public class ChangeStatusUpdater {
                             @NotNull SRunningBuild build,
                             boolean completed,
                             @NotNull String hash) {
-    final StringBuilder comment = new StringBuilder("[Build ");
-
+    final StringBuilder comment = new StringBuilder();
+    comment.append("TeamCity ");
+    final SBuildType bt = build.getBuildType();
+    if (bt != null) {
+      comment.append(bt.getFullName());
+    }
+    comment.append(" [Build ");
     comment.append(build.getBuildNumber());
     comment.append("](");
     comment.append(myWeb.getViewResultsUrl(build));
@@ -72,8 +77,6 @@ public class ChangeStatusUpdater {
       comment.append("is now running");
     }
 
-    comment.append(" using a merge of ");
-    comment.append(hash);
     comment.append("\n");
 
     final String text = build.getStatusDescriptor().getText();
@@ -221,7 +224,7 @@ public class ChangeStatusUpdater {
                         hash,
                         getComment(version, build, status != GitHubChangeState.Pending, hash)
                 );
-                LOG.info("Added comment to GitHub PR : " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status);
+                LOG.info("Added comment to GitHub commit: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
               } catch (IOException e) {
                 LOG.warn("Failed add GitHub comment for branch: " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status + ". " + e.getMessage(), e);
               }

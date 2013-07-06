@@ -21,11 +21,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.impl.data.CommitInfo;
-import jetbrains.teamcilty.github.api.impl.data.CommitStatus;
-import jetbrains.teamcilty.github.api.impl.data.IssueComment;
-import jetbrains.teamcilty.github.api.impl.data.PullRequestInfo;
-import jetbrains.teamcilty.github.api.impl.data.RepoInfo;
+import jetbrains.teamcilty.github.api.impl.data.*;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -78,6 +74,7 @@ public class GitHubApiImpl implements GitHubApi {
     myPassword = password;
   }
 
+  @Nullable
   private static String getPullRequestId(@NotNull String repoName,
                                          @NotNull String branchName) {
     final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
@@ -99,7 +96,7 @@ public class GitHubApiImpl implements GitHubApi {
                                  @NotNull final String hash) throws IOException {
     final HttpGet post = new HttpGet(myUrls.getStatusUrl(repoOwner, repoName, hash));
     includeAuthentication(post);
-    post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+    setDefaultHeaders(post);
 
     try {
       final HttpResponse execute = myClient.execute(post);
@@ -113,6 +110,11 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
+  private void setDefaultHeaders(@NotNull HttpUriRequest request) {
+    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
+  }
+
   public void setChangeStatus(@NotNull final String repoOwner,
                               @NotNull final String repoName,
                               @NotNull final String hash,
@@ -124,7 +126,7 @@ public class GitHubApiImpl implements GitHubApi {
     try {
       post.setEntity(requestEntity);
       includeAuthentication(post);
-      post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+      setDefaultHeaders(post);
 
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
@@ -146,15 +148,15 @@ public class GitHubApiImpl implements GitHubApi {
                                       @NotNull String repoName,
                                       @NotNull String branchName) throws IOException {
 
-    String pullRequestId = getPullRequestId(repoName, branchName);
+    final String pullRequestId = getPullRequestId(repoName, branchName);
+    if (pullRequestId == null) return null;
 
     //  /repos/:owner/:repo/pulls/:number
 
     final String requestUrl = myUrls.getPullRequestInfo(repoOwner, repoName, pullRequestId);
     final HttpGet get = new HttpGet(requestUrl);
     includeAuthentication(get);
-    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
-    get.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
+    setDefaultHeaders(get);
 
     final PullRequestInfo pullRequestInfo = processResponse(get, PullRequestInfo.class);
 
@@ -187,8 +189,7 @@ public class GitHubApiImpl implements GitHubApi {
 
   @NotNull
   private <T> T processResponse(@NotNull HttpUriRequest request, @NotNull final Class<T> clazz) throws IOException {
-    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
-    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
+    setDefaultHeaders(request);
     try {
       final HttpResponse execute = myClient.execute(request);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
@@ -262,27 +263,18 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private String getAddCommentUrl(@NotNull final String ownerName,
-                                  @NotNull final String repoName,
-                                  @NotNull final String hash) {
-
-    String pullRequestId = getPullRequestId(repoName, hash);
-    LOG.info("pull request ID: "+pullRequestId);
-    return myUrls.getAddCommentUrl(ownerName, repoName, pullRequestId);
-  }
-
   public void postComment(@NotNull final String ownerName,
                           @NotNull final String repoName,
                           @NotNull final String hash,
                           @NotNull final String comment) throws IOException {
-    LOG.debug("Posting: " + comment);
-    final String requestUrl = getAddCommentUrl(ownerName, repoName, hash);
+
+    final String requestUrl = myUrls.getAddCommentUrl(ownerName, repoName, hash);
     final GSonEntity requestEntity = new GSonEntity(myGson, new IssueComment(comment));
     final HttpPost post = new HttpPost(requestUrl);
     try {
       post.setEntity(requestEntity);
       includeAuthentication(post);
-      post.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
+      setDefaultHeaders(post);
 
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
