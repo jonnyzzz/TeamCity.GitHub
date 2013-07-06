@@ -84,7 +84,7 @@ public interface GitHubApi {
    * @throws IOException
    */
   public void postComment(@NotNull final String ownerName,
-                            @NotNull final String repoName,
-                            @NotNull final String hash,
-                            @NotNull final String comment) throws IOException;
+                          @NotNull final String repoName,
+                          @NotNull final String hash,
+                          @NotNull final String comment) throws IOException;
 }

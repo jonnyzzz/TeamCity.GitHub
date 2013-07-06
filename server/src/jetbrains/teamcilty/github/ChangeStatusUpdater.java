@@ -29,6 +29,7 @@ import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.ui.UpdateChangesConstants;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.List;
@@ -53,32 +54,51 @@ public class ChangeStatusUpdater {
     myExecutor = services.getLowPriorityExecutorService();
   }
 
+  @NotNull
   private String getComment(@NotNull RepositoryVersion version,
                             @NotNull SRunningBuild build,
                             boolean completed,
                             @NotNull String hash) {
-    StringBuilder comment = new StringBuilder("[Build ").append(build.getBuildNumber()).append("](").append(myWeb.getViewResultsUrl(build)).append(") ");
+    final StringBuilder comment = new StringBuilder("[Build ");
+
+    comment.append(build.getBuildNumber());
+    comment.append("](");
+    comment.append(myWeb.getViewResultsUrl(build));
+    comment.append(") ");
+
     if (completed) {
       comment.append("outcome was **").append(build.getStatusDescriptor().getStatus().getText()).append("**");
     } else {
       comment.append("is now running");
     }
-    comment.append(" using a merge of ")
-            .append(hash)
-            .append("\n");
-    String text = build.getStatusDescriptor().getText();
+
+    comment.append(" using a merge of ");
+    comment.append(hash);
+    comment.append("\n");
+
+    final String text = build.getStatusDescriptor().getText();
     if (completed && text != null) {
-      comment.append("Summary: ").append(text).append(" Build time: ").append(getFriendlyDuration(build.getDuration()));
-      if (build.getBuildStatus() != Status.NORMAL){
+      comment.append("Summary: ");
+      comment.append(text);
+      comment.append(" Build time: ");
+      comment.append(getFriendlyDuration(build.getDuration()));
+
+      if (build.getBuildStatus() != Status.NORMAL) {
+
         final List<STestRun> failedTests = build.getFullStatistics().getFailedTests();
         if (!failedTests.isEmpty()) {
           comment.append("\n### Failed tests\n");
           comment.append("```\n");
+
           for (int i = 0; i < failedTests.size(); i++) {
-            STestRun testRun = failedTests.get(i);
-            comment.append("").append(testRun.getTest().getName().toString()).append(": ");
-            comment.append(getFailureText(testRun.getFailureInfo())).append("\n\n");
-            if (i==10){
+            final STestRun testRun = failedTests.get(i);
+            comment.append("");
+            comment.append(testRun.getTest().getName().toString());
+            comment.append(": ");
+            comment.append(getFailureText(testRun.getFailureInfo()));
+            comment.append("\n\n");
+
+            if (i == 10) {
               comment.append("\n##### there are ")
                       .append(build.getFullStatistics().getFailedTestCount() - i)
                       .append(" more failed tests, see build details\n");
@@ -93,6 +113,7 @@ public class ChangeStatusUpdater {
     return comment.toString();
   }
 
+  @NotNull
   private static String getFriendlyDuration(long millis) {
     long second = (millis / 1000) % 60;
     long minute = (millis / (1000 * 60)) % 60;
@@ -100,14 +121,15 @@ public class ChangeStatusUpdater {
     return hour + ":" + minute + ":" + second;
   }
 
-  private static String getFailureText(TestFailureInfo failureInfo) {
-    if (failureInfo == null) {
-      return "<no details avaliable>";
-    } else {
-      StringBuffer sb = new StringBuffer(failureInfo.getStacktraceMessage());
-      sb.append(failureInfo.getShortStacktrace());
-      return sb.toString();
-    }
+  @NotNull
+  private static String getFailureText(@Nullable final TestFailureInfo failureInfo) {
+    final String no_data = "<no details avaliable>";
+    if (failureInfo == null) return no_data;
+
+    final String stacktrace = failureInfo.getShortStacktrace();
+    if (stacktrace == null || StringUtil.isEmptyOrSpaces(stacktrace)) return no_data;
+
+    return stacktrace;
   }
 
   @NotNull
@@ -197,7 +219,7 @@ public class ChangeStatusUpdater {
                         repositoryOwner,
                         repositoryName,
                         version.getVcsBranch(),
-                        getComment(version,build,status!=GitHubChangeState.Pending,hash)
+                        getComment(version, build, status != GitHubChangeState.Pending, hash)
                 );
                 LOG.info("Added comment to GitHub PR : " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status);
               } catch (IOException e) {
