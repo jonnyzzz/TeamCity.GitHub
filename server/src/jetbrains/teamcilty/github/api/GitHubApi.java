@@ -77,4 +77,14 @@ public interface GitHubApi {
   Collection<String> getCommitParents(@NotNull String repoOwner,
                                       @NotNull String repoName,
                                       @NotNull String hash) throws IOException;
+   /* Post comment to pull request
+   * @param repoName
+   * @param hash
+   * @param comment
+   * @throws IOException
+   */
+  public void postComment(@NotNull final String ownerName,
+                            @NotNull final String repoName,
+                            @NotNull final String hash,
+                            @NotNull final String comment) throws IOException;
 }
