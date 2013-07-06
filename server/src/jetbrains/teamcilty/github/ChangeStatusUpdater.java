@@ -218,7 +218,7 @@ public class ChangeStatusUpdater {
                 api.postComment(
                         repositoryOwner,
                         repositoryName,
-                        version.getVcsBranch(),
+                        hash,
                         getComment(version, build, status != GitHubChangeState.Pending, hash)
                 );
                 LOG.info("Added comment to GitHub PR : " + version.getVcsBranch() + ", buildId: " + build.getBuildId() + ", status: " + status);
