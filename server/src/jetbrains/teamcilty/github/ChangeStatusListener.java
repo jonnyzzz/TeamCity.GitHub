@@ -58,7 +58,7 @@ public class ChangeStatusListener {
     SBuildType bt = build.getBuildType();
     if (bt == null) return;
 
-    for (SBuildFeatureDescriptor feature : bt.getBuildFeatures()) {
+    for (SBuildFeatureDescriptor feature : bt.getResolvedSettings().getBuildFeatures()) {
       if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) continue;
 
       final Handler h = myUpdater.getUpdateHandler(feature);
