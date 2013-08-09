@@ -16,6 +16,7 @@
 
 package jetbrains.teamcilty.github.ui;
 
+import jetbrains.buildServer.parameters.ReferencesResolverUtil;
 import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
@@ -93,7 +94,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
 
         if (!checkNotEmpty(p, c.getServerKey(), "GitHub api URL", result)) {
           final String url = "" + p.get(c.getServerKey());
-          if (!(url.startsWith("http://") || url.startsWith("https://"))) {
+          if (!ReferencesResolverUtil.mayContainReference(url) && !(url.startsWith("http://") || url.startsWith("https://"))) {
             result.add(new InvalidProperty(c.getServerKey(), "GitHub api URL should start with http:// or https://"));
           }
         }
