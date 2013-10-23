@@ -31,6 +31,15 @@ public class CommitStatus {
   public CommitStatus(@Nullable String state, @Nullable String target_url, @Nullable String description) {
     this.state = state;
     this.target_url = target_url;
-    this.description = description;
+    this.description = truncateStringValueWithDotsAtEnd(description, 140);
+  }
+
+  @Nullable
+  private static String truncateStringValueWithDotsAtEnd(@Nullable final String str, final int maxLength) {
+    if (str == null) return null;
+    if (str.length() > maxLength) {
+      return str.substring(0, maxLength - 1 - 3) + "...";
+    }
+    return str;
   }
 }

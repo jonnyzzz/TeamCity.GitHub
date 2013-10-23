@@ -152,7 +152,7 @@ public class ChangeStatusUpdater {
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
-        scheduleChangeUpdate(version, build, "TeamCity Build " + build.getFullName() + " started", GitHubChangeState.Pending);
+        scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
       }
 
       public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
@@ -163,7 +163,7 @@ public class ChangeStatusUpdater {
         } else {
           text = "";
         }
-        scheduleChangeUpdate(version, build, "TeamCity Build " + build.getFullName() + " finished" + text, status);
+        scheduleChangeUpdate(version, build, "Finished TeamCity Build " + build.getFullName() + " " + text, status);
       }
 
       private void scheduleChangeUpdate(@NotNull final RepositoryVersion version,
