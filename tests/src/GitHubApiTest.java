@@ -17,6 +17,7 @@
 import com.intellij.openapi.util.io.FileUtil;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.util.PropertiesUtil;
+import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
@@ -115,6 +116,15 @@ public class GitHubApiTest extends BaseTestCase {
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status"
+    );
+  }
+
+  @Test
+  public void test_set_longer_status() throws IOException, AuthenticationException {
+    myApi.setChangeStatus(myRepoOwner, myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9",
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status" + StringUtil.repeat("test", " ", 1000)
     );
   }
 
