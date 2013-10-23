@@ -14,13 +14,13 @@ Plugin is descibed in one of the following blog posts
 
 Download
 ========
-I set up TeamCity build configuration for it. Fresh builds are downloadable from 
-http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv
+I set up TeamCity build configuration for it [here](http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv)
 
 To install plugin, put downloaded ```.zip``` file into `<TeamCity Data Directory>/plugins` folder and restart the server
 
-**NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`).
+Letst build of the plugin could be downloaded from [TeamCity's build artifact](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/99290:id/teamcity.github.zip)
 
+**NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`)
 
 
 License
