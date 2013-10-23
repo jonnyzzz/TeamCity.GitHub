@@ -38,7 +38,7 @@ public class CommitStatus {
   private static String truncateStringValueWithDotsAtEnd(@Nullable final String str, final int maxLength) {
     if (str == null) return null;
     if (str.length() > maxLength) {
-      return str.substring(0, maxLength - 1 - 3) + "...";
+      return str.substring(0, maxLength - 2) + "\u2026";
     }
     return str;
   }
