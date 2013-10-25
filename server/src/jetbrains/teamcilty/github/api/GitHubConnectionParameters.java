@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github.api;
 
 import jetbrains.buildServer.version.ServerVersionHolder;
+import jetbrains.teamcilty.github.api.impl.ApacheHttpBasedGitHubClient;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,9 +55,9 @@ public abstract class GitHubConnectionParameters {
   public GitHubClient create() {
     GitHubClient client;
     try {
-      client = GitHubClient.createClient(myUrl);
+      client = ApacheHttpBasedGitHubClient.createClient(myUrl);
     } catch (IllegalArgumentException e) {
-      client = new GitHubClient(getHost(myUrl));
+      client = new ApacheHttpBasedGitHubClient(getHost(myUrl));
     }
     client.setUserAgent("JetBrains TeamCity " + ServerVersionHolder.getVersion().getDisplayVersion());
     applyToGitHubClient(client);
