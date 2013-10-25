@@ -137,14 +137,14 @@ public class GitHubApiTest extends BaseTestCase {
   public void test_resolve_pull_request() throws IOException {
     String hash = myApi.findPullRequestCommit(myRepositoryId, "refs/pull/1/merge");
     System.out.println(hash);
-    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+    Assert.assertEquals(hash, "cee389bbaf785b07362880124d3aff5ac97807cf");
   }
 
   @Test
   public void test_resolve_pull_request_2() throws IOException {
     String hash = myApi.findPullRequestCommit(myRepositoryId, "refs/pull/1/head");
     System.out.println(hash);
-    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+    Assert.assertEquals(hash, "cee389bbaf785b07362880124d3aff5ac97807cf");
   }
 
   @Test
@@ -166,7 +166,7 @@ public class GitHubApiTest extends BaseTestCase {
   @Test
   public void test_parent_hashes() throws IOException {
     enableDebug();
-    Collection<String> parents = myApi.getCommitParents(myRepositoryId, "4664d7fa1b9fa71ea7c7958c126a05ea5d0d64f9");
+    Collection<String> parents = myApi.getCommitParents(myRepositoryId, "3d8e40b01ce7d6e2ae6654d74092b26bf66371c3");
     System.out.println(parents);
   }
 }
