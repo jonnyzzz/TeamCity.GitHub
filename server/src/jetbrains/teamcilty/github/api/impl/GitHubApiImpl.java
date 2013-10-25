@@ -81,7 +81,21 @@ public class GitHubApiImpl implements GitHubApi {
 
   @NotNull
   public CommitStatus setChangeStatus(@NotNull final IRepositoryIdProvider repository, @NotNull final String sha1, @NotNull final CommitStatus status) throws IOException {
+    String description = status.getDescription();
+    if (description != null) {
+      description = truncateStringValueWithDotsAtEnd(description, 140);
+      status.setDescription(description);
+    }
     return myCommitService.createStatus(repository, sha1, status);
+  }
+
+  @Nullable
+  private static String truncateStringValueWithDotsAtEnd(@Nullable final String str, final int maxLength) {
+    if (str == null) return null;
+    if (str.length() > maxLength) {
+      return str.substring(0, maxLength - 2) + "\u2026";
+    }
+    return str;
   }
 
   @Nullable
