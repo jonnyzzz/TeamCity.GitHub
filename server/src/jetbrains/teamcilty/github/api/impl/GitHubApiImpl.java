@@ -99,13 +99,13 @@ public class GitHubApiImpl implements GitHubApi {
                                          @NotNull String branchName) {
     final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
     if (!matcher.matches()) {
-      LOG.debug("Branch " + branchName + " for repo " + repo + " does not look like pull request");
+      LOG.debug("Branch " + branchName + " for repo " + repo.generateId() + " does not look like pull request");
       return null;
     }
 
     final String pullRequestId = matcher.group(1);
     if (pullRequestId == null) {
-      LOG.debug("Branch " + branchName + " for repo " + repo + " does not contain pull request id");
+      LOG.debug("Branch " + branchName + " for repo " + repo.generateId() + " does not contain pull request id");
       return null;
     }
     return pullRequestId;
