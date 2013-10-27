@@ -26,6 +26,7 @@ import java.util.regex.Pattern;
  * @author Vladsilav.Rassokhin@jetbrains.com
  */
 public abstract class GitHubConnectionParameters {
+  public static final Pattern HOST_PATTERN = Pattern.compile("(?:https?://)?([^/]+)(?:/.*)?");
   @NotNull
   protected final String myUrl;
 
@@ -34,8 +35,7 @@ public abstract class GitHubConnectionParameters {
   }
 
   public static String getHost(@NotNull final String url) {
-    final Pattern pattern = Pattern.compile("(?:https?://)?([^/]+)(?:/.*)?");
-    final Matcher matcher = pattern.matcher(url);
+    final Matcher matcher = HOST_PATTERN.matcher(url);
     if (!matcher.find()) {
       return url;
     }
