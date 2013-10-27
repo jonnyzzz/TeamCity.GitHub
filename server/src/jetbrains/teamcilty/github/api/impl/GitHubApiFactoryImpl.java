@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 
 package jetbrains.teamcilty.github.api.impl;
 
+import jetbrains.buildServer.version.ServerVersionHolder;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
+import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
+import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -32,7 +35,15 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, @NotNull String password) {
-    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
+  public GitHubApi openGitHub(@NotNull final GitHubConnectionParameters parameters) {
+    GitHubClient client;
+    try {
+      client = ApacheHttpBasedGitHubClient.createClient(parameters.getUrl(), myWrapper);
+    } catch (IllegalArgumentException e) {
+      client = new ApacheHttpBasedGitHubClient(myWrapper, GitHubConnectionParameters.getHost(parameters.getUrl()));
+    }
+    client.setUserAgent("JetBrains TeamCity " + ServerVersionHolder.getVersion().getDisplayVersion());
+    parameters.applyCredentials(client);
+    return new GitHubApiImpl(client);
   }
 }

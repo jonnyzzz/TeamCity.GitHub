@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
 
 package jetbrains.teamcilty.github.api;
 
+import org.eclipse.egit.github.core.CommitComment;
+import org.eclipse.egit.github.core.CommitStatus;
+import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,17 +30,19 @@ import java.util.Collection;
  * Date: 06.09.12 2:39
  */
 public interface GitHubApi {
-  String readChangeStatus(@NotNull String repoOwner,
-                          @NotNull String repositoryName,
-                          @NotNull String hash) throws IOException;
+  /**
+   * Returns last commit status or null if commit does not have any status
+   *
+   * @param repository repository
+   * @param sha1       commit hash
+   * @return see above
+   * @throws IOException
+   */
+  @Nullable
+  CommitStatus getChangeStatus(@NotNull IRepositoryIdProvider repository, @NotNull String sha1) throws IOException;
 
-  void setChangeStatus(@NotNull String repoOwner,
-                       @NotNull String repositoryName,
-                       @NotNull String hash,
-                       @NotNull GitHubChangeState status,
-                       @NotNull String targetUrl,
-                       @NotNull String description) throws IOException;
-
+  @NotNull
+  CommitStatus setChangeStatus(@NotNull IRepositoryIdProvider repository, @NotNull String sha1, @NotNull CommitStatus status) throws IOException;
 
   /**
    * checks if specified branch represents GitHub pull request merge branch,
@@ -61,9 +66,7 @@ public interface GitHubApi {
    * @throws IOException on communication error
    */
   @Nullable
-  String findPullRequestCommit(@NotNull String repoOwner,
-                               @NotNull String repoName,
-                               @NotNull String branchName) throws IOException;
+  String findPullRequestCommit(@NotNull IRepositoryIdProvider repository, @NotNull String branchName) throws IOException;
 
   /**
    * return parent commits for given commit
@@ -74,17 +77,15 @@ public interface GitHubApi {
    * @throws IOException
    */
   @NotNull
-  Collection<String> getCommitParents(@NotNull String repoOwner,
-                                      @NotNull String repoName,
-                                      @NotNull String hash) throws IOException;
-   /* Post comment to pull request
-   * @param repoName
+  Collection<String> getCommitParents(@NotNull IRepositoryIdProvider repository, @NotNull String hash) throws IOException;
+
+  /** Post comment to pull request
+   *
    * @param hash
    * @param comment
    * @throws IOException
    */
-  public void postComment(@NotNull final String ownerName,
-                          @NotNull final String repoName,
-                          @NotNull final String hash,
-                          @NotNull final String comment) throws IOException;
+  public CommitComment postComment(@NotNull IRepositoryIdProvider repository,
+                                   @NotNull final String hash,
+                                   @NotNull final String comment) throws IOException;
 }

@@ -2,6 +2,7 @@
   <library name="Test-Api">
     <CLASSES>
       <root url="jar://$TeamCityDistribution$/devPackage/tests/tests-support.jar!/" />
+      <root url="jar://$TeamCityDistribution$/devPackage/tests/junit-3.8.2.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />

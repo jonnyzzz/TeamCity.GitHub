@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,5 @@ public interface GitHubApiFactory {
   public static final String DEFAULT_URL = "https://api.github.com";
 
   @NotNull
-  GitHubApi openGitHub(@NotNull final String url,
-                       @NotNull final String username,
-                       @NotNull final String password);
+  GitHubApi openGitHub(@NotNull final GitHubConnectionParameters connectionParameters);
 }

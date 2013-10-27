@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2012 JetBrains s.r.o.
+ * Copyright 2000-2013 JetBrains s.r.o.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,126 +16,99 @@
 
 package jetbrains.teamcilty.github.api.impl;
 
-import com.google.gson.Gson;
 import com.intellij.openapi.diagnostic.Logger;
-import jetbrains.buildServer.util.FileUtil;
+import jetbrains.buildServer.util.CollectionsUtil;
+import jetbrains.buildServer.util.Converter;
 import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.impl.data.*;
 import jetbrains.teamcilty.github.util.LoggerHelper;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.util.EntityUtils;
+import org.eclipse.egit.github.core.*;
+import org.eclipse.egit.github.core.client.GitHubClient;
+import org.eclipse.egit.github.core.client.GitHubRequest;
+import org.eclipse.egit.github.core.service.CommitService;
+import org.eclipse.egit.github.core.service.PullRequestService;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * @author Eugene Petrenko (eugene.petrenko@gmail.com)
+ * @author Vladsilav Rassokhin (vlad.rassokhin@gmail.com)
  * @author Tomaz Cerar
  *         Date: 05.09.12 23:39
  */
 public class GitHubApiImpl implements GitHubApi {
   private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
   private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
-  @NotNull
-  private final HttpClientWrapper myClient;
-  private final Gson myGson = new Gson();
-  private final GitHubApiPaths myUrls;
-  private final String myUserName;
-  private final String myPassword;
+  private final GitHubClient myClient;
+  private final CommitService myCommitService;
+  private final PullRequestService myPullRequestService;
 
-  public GitHubApiImpl(@NotNull final HttpClientWrapper client,
-                       @NotNull final GitHubApiPaths urls,
-                       @NotNull final String userName,
-                       @NotNull final String password) {
+  public GitHubApiImpl(@NotNull final GitHubClient client) {
     myClient = client;
-    myUrls = urls;
-    myUserName = userName;
-    myPassword = password;
+    // Test client OK
+    try {
+      myClient.get(new GitHubRequest().setUri("/"));
+    } catch (IOException e) {
+      LOG.warn("Client unuseful: " + e.getMessage(), e);
+    }
+    myCommitService = new CommitService(myClient);
+    myPullRequestService = new PullRequestService(myClient);
   }
 
   @Nullable
-  private static String getPullRequestId(@NotNull String repoName,
+  public CommitStatus getChangeStatus(@NotNull final IRepositoryIdProvider repository, @NotNull final String sha1) throws IOException {
+    final List<CommitStatus> statuses = myCommitService.getStatuses(repository, sha1);
+    if (statuses == null || statuses.isEmpty()) {
+      return null;
+    }
+    final ArrayList<CommitStatus> list = new ArrayList<CommitStatus>(statuses);
+    Collections.sort(list, new Comparator<CommitStatus>() {
+      public int compare(@NotNull CommitStatus o1, @NotNull CommitStatus o2) {
+        // Note reverse order!
+        return o2.getUpdatedAt().compareTo(o1.getUpdatedAt());
+      }
+    });
+    return list.iterator().next();
+  }
+
+  @NotNull
+  public CommitStatus setChangeStatus(@NotNull final IRepositoryIdProvider repository, @NotNull final String sha1, @NotNull final CommitStatus status) throws IOException {
+    String description = status.getDescription();
+    if (description != null) {
+      description = truncateStringValueWithDotsAtEnd(description, 140);
+      status.setDescription(description);
+    }
+    return myCommitService.createStatus(repository, sha1, status);
+  }
+
+  @Nullable
+  private static String truncateStringValueWithDotsAtEnd(@Nullable final String str, final int maxLength) {
+    if (str == null) return null;
+    if (str.length() > maxLength) {
+      return str.substring(0, maxLength - 2) + "\u2026";
+    }
+    return str;
+  }
+
+  @Nullable
+  private static String getPullRequestId(@NotNull IRepositoryIdProvider repo,
                                          @NotNull String branchName) {
     final Matcher matcher = PULL_REQUEST_BRANCH.matcher(branchName);
     if (!matcher.matches()) {
-      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not look like pull request");
+      LOG.debug("Branch " + branchName + " for repo " + repo.generateId() + " does not look like pull request");
       return null;
     }
 
     final String pullRequestId = matcher.group(1);
     if (pullRequestId == null) {
-      LOG.debug("Branch " + branchName + " for repo " + repoName + " does not contain pull request id");
+      LOG.debug("Branch " + branchName + " for repo " + repo.generateId() + " does not contain pull request id");
       return null;
     }
     return pullRequestId;
-  }
-
-  public String readChangeStatus(@NotNull final String repoOwner,
-                                 @NotNull final String repoName,
-                                 @NotNull final String hash) throws IOException {
-    final HttpGet post = new HttpGet(myUrls.getStatusUrl(repoOwner, repoName, hash));
-    includeAuthentication(post);
-    setDefaultHeaders(post);
-
-    try {
-      final HttpResponse execute = myClient.execute(post);
-      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(post, null, execute);
-        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
-      }
-      return "TBD";
-    } finally {
-      post.abort();
-    }
-  }
-
-  private void setDefaultHeaders(@NotNull HttpUriRequest request) {
-    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT_ENCODING, "UTF-8"));
-    request.setHeader(new BasicHeader(HttpHeaders.ACCEPT, "application/json"));
-  }
-
-  public void setChangeStatus(@NotNull final String repoOwner,
-                              @NotNull final String repoName,
-                              @NotNull final String hash,
-                              @NotNull final GitHubChangeState status,
-                              @NotNull final String targetUrl,
-                              @NotNull final String description) throws IOException {
-    final GSonEntity requestEntity = new GSonEntity(myGson, new CommitStatus(status.getState(), targetUrl, description));
-    final HttpPost post = new HttpPost(myUrls.getStatusUrl(repoOwner, repoName, hash));
-    try {
-      post.setEntity(requestEntity);
-      includeAuthentication(post);
-      setDefaultHeaders(post);
-
-      final HttpResponse execute = myClient.execute(post);
-      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(post, requestEntity.getText(), execute);
-        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
-      }
-    } finally {
-      post.abort();
-    }
   }
 
   public boolean isPullRequestMergeBranch(@NotNull String branchName) {
@@ -144,145 +117,31 @@ public class GitHubApiImpl implements GitHubApi {
   }
 
   @Nullable
-  public String findPullRequestCommit(@NotNull String repoOwner,
-                                      @NotNull String repoName,
-                                      @NotNull String branchName) throws IOException {
+  public String findPullRequestCommit(@NotNull IRepositoryIdProvider repository, @NotNull String branchName) throws IOException {
 
-    final String pullRequestId = getPullRequestId(repoName, branchName);
+    final String pullRequestId = getPullRequestId(repository, branchName);
     if (pullRequestId == null) return null;
 
     //  /repos/:owner/:repo/pulls/:number
-
-    final String requestUrl = myUrls.getPullRequestInfo(repoOwner, repoName, pullRequestId);
-    final HttpGet get = new HttpGet(requestUrl);
-    includeAuthentication(get);
-    setDefaultHeaders(get);
-
-    final PullRequestInfo pullRequestInfo = processResponse(get, PullRequestInfo.class);
-
-    final RepoInfo head = pullRequestInfo.head;
-    if (head != null) {
-      return head.sha;
-    }
-    return null;
+    final PullRequest pullRequest = myPullRequestService.getPullRequest(repository, Integer.parseInt(pullRequestId));
+    return pullRequest.getHead().getSha();
   }
 
   @NotNull
-  public Collection<String> getCommitParents(@NotNull String repoOwner, @NotNull String repoName, @NotNull String hash) throws IOException {
-
-    final String requestUrl = myUrls.getCommitInfo(repoOwner, repoName, hash);
-    final HttpGet get = new HttpGet(requestUrl);
-
-    final CommitInfo infos = processResponse(get, CommitInfo.class);
-    if (infos.parents != null) {
-      final Set<String> parents = new HashSet<String>();
-      for (CommitInfo p : infos.parents) {
-        String sha = p.sha;
-        if (sha != null) {
-          parents.add(sha);
-        }
+  public Collection<String> getCommitParents(@NotNull IRepositoryIdProvider repository, @NotNull String hash) throws IOException {
+    final RepositoryCommit commit = myCommitService.getCommit(repository, hash);
+    return CollectionsUtil.convertCollection(commit.getParents(), new Converter<String, Commit>() {
+      public String createFrom(@NotNull Commit source) {
+        return source.getSha();
       }
-      return parents;
-    }
-    return Collections.emptyList();
+    });
   }
 
-  @NotNull
-  private <T> T processResponse(@NotNull HttpUriRequest request, @NotNull final Class<T> clazz) throws IOException {
-    setDefaultHeaders(request);
-    try {
-      final HttpResponse execute = myClient.execute(request);
-      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(request, null, execute);
-        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
-      }
-
-      final HttpEntity entity = execute.getEntity();
-      if (entity == null) {
-        logFailedRequest(request, null, execute);
-        throw new IOException("Failed to complete request to GitHub. Empty response. Status: " + execute.getStatusLine());
-      }
-
-      try {
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        entity.writeTo(bos);
-        final String json = bos.toString("utf-8");
-        LOG.debug("Parsing json for " + request.getURI().toString() + ": " + json);
-        return myGson.fromJson(json, clazz);
-      } finally {
-        EntityUtils.consume(entity);
-      }
-    } finally {
-      request.abort();
-    }
-  }
-
-  private void includeAuthentication(@NotNull HttpRequest request) throws IOException {
-    try {
-      request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), request));
-    } catch (AuthenticationException e) {
-      throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
-    }
-  }
-
-  private void logFailedRequest(@NotNull HttpUriRequest requestUrl,
-                                @Nullable String requestEntity,
-                                @NotNull HttpResponse execute) throws IOException {
-    String responseText = extractResponseEntity(execute);
-    if (responseText == null) {
-      responseText = "<none>";
-    }
-    if (requestEntity == null) {
-      requestEntity = "<none>";
-    }
-
-    LOG.debug("Failed to complete query to GitHub with:\n" +
-            "  requestURL: " + requestUrl.getURI().toString() + "\n" +
-            "  requestMethod: " + requestUrl.getMethod() + "\n" +
-            "  requestEntity: " + requestEntity + "\n" +
-            "  response: " + execute.getStatusLine() + "\n" +
-            "  responseEntity: " + responseText
-    );
-  }
-
-  @Nullable
-  private String extractResponseEntity(@NotNull final HttpResponse execute) throws IOException {
-    final HttpEntity responseEntity = execute.getEntity();
-    if (responseEntity == null) return null;
-    try {
-      final byte[] dataSlice = new byte[256 * 1024]; //limit buffer with 256K
-      final InputStream content = responseEntity.getContent();
-      try {
-        int sz = content.read(dataSlice, 0, dataSlice.length);
-        return new String(dataSlice, 0, sz, "utf-8");
-      } finally {
-        FileUtil.close(content);
-      }
-    } finally {
-      EntityUtils.consume(responseEntity);
-    }
-  }
-
-  public void postComment(@NotNull final String ownerName,
-                          @NotNull final String repoName,
-                          @NotNull final String hash,
-                          @NotNull final String comment) throws IOException {
-
-    final String requestUrl = myUrls.getAddCommentUrl(ownerName, repoName, hash);
-    final GSonEntity requestEntity = new GSonEntity(myGson, new IssueComment(comment));
-    final HttpPost post = new HttpPost(requestUrl);
-    try {
-      post.setEntity(requestEntity);
-      includeAuthentication(post);
-      setDefaultHeaders(post);
-
-      final HttpResponse execute = myClient.execute(post);
-      if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(post, requestEntity.getText(), execute);
-        throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
-      }
-    } finally {
-      post.abort();
-    }
+  public CommitComment postComment(@NotNull final IRepositoryIdProvider repository,
+                                   @NotNull final String hash,
+                                   @NotNull final String comment) throws IOException {
+    final CommitComment cc = new CommitComment();
+    cc.setBody(comment);
+    return myCommitService.addComment(repository, hash, cc);
   }
 }
