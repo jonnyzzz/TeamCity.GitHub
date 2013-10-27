@@ -73,11 +73,10 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
   protected <T extends HttpEntityEnclosingRequestBase> void sendParams(T request, Object params)
           throws IOException {
     if (params != null) {
-      request.setHeader(HEADER_CONTENT_TYPE, CONTENT_TYPE_JSON
-              + "; charset=" + CHARSET_UTF8);
+      request.setHeader(HttpHeaders.CONTENT_TYPE, CONTENT_TYPE_JSON + "; charset=" + CHARSET_UTF8);
       request.setEntity(new GSonEntity(toJson(params)));
     } else {
-      request.setHeader("Content-Length", "0");
+      request.setHeader(HttpHeaders.CONTENT_LENGTH, "0");
     }
   }
 
