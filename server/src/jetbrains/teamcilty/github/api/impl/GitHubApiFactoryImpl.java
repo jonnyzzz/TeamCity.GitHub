@@ -16,9 +16,11 @@
 
 package jetbrains.teamcilty.github.api.impl;
 
-import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
+import jetbrains.buildServer.version.ServerVersionHolder;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
+import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
+import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -33,7 +35,15 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull final GitHubConnectionParameters connectionParameters) {
-    return new GitHubApiImpl(connectionParameters);
+  public GitHubApi openGitHub(@NotNull final GitHubConnectionParameters parameters) {
+    GitHubClient client;
+    try {
+      client = ApacheHttpBasedGitHubClient.createClient(parameters.getUrl(), myWrapper);
+    } catch (IllegalArgumentException e) {
+      client = new ApacheHttpBasedGitHubClient(myWrapper, GitHubConnectionParameters.getHost(parameters.getUrl()));
+    }
+    client.setUserAgent("JetBrains TeamCity " + ServerVersionHolder.getVersion().getDisplayVersion());
+    parameters.applyCredentials(client);
+    return new GitHubApiImpl(client);
   }
 }

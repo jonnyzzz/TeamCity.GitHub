@@ -20,8 +20,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.CollectionsUtil;
 import jetbrains.buildServer.util.Converter;
 import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
 import jetbrains.teamcilty.github.util.LoggerHelper;
 import org.eclipse.egit.github.core.*;
 import org.eclipse.egit.github.core.client.GitHubClient;
@@ -45,14 +43,12 @@ import java.util.regex.Pattern;
 public class GitHubApiImpl implements GitHubApi {
   private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
   private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
-  private final GitHubConnectionParameters myConnectionParameters;
   private final GitHubClient myClient;
   private final CommitService myCommitService;
   private final PullRequestService myPullRequestService;
 
-  public GitHubApiImpl(@NotNull final GitHubConnectionParameters connectionParameters) {
-    myConnectionParameters = connectionParameters;
-    myClient = myConnectionParameters.create();
+  public GitHubApiImpl(@NotNull final GitHubClient client) {
+    myClient = client;
     // Test client OK
     try {
       myClient.get(new GitHubRequest().setUri("/"));

@@ -16,8 +16,6 @@
 
 package jetbrains.teamcilty.github.api;
 
-import jetbrains.buildServer.version.ServerVersionHolder;
-import jetbrains.teamcilty.github.api.impl.ApacheHttpBasedGitHubClient;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,21 +47,7 @@ public abstract class GitHubConnectionParameters {
     return myUrl;
   }
 
-  protected abstract void applyToGitHubClient(@NotNull final GitHubClient client);
-
-  @NotNull
-  public GitHubClient create() {
-    GitHubClient client;
-    try {
-      client = ApacheHttpBasedGitHubClient.createClient(myUrl);
-    } catch (IllegalArgumentException e) {
-      client = new ApacheHttpBasedGitHubClient(getHost(myUrl));
-    }
-    client.setUserAgent("JetBrains TeamCity " + ServerVersionHolder.getVersion().getDisplayVersion());
-    applyToGitHubClient(client);
-
-    return client;
-  }
+  public abstract void applyCredentials(@NotNull final GitHubClient client);
 
   public static class Basic extends GitHubConnectionParameters {
     @NotNull
@@ -78,7 +62,7 @@ public abstract class GitHubConnectionParameters {
     }
 
     @Override
-    protected void applyToGitHubClient(@NotNull final GitHubClient client) {
+    public void applyCredentials(@NotNull final GitHubClient client) {
       client.setCredentials(myUsername, myPassword);
     }
 
@@ -103,7 +87,7 @@ public abstract class GitHubConnectionParameters {
     }
 
     @Override
-    protected void applyToGitHubClient(@NotNull final GitHubClient client) {
+    public void applyCredentials(@NotNull final GitHubClient client) {
       client.setOAuth2Token(myOAuth2Token);
     }
 
@@ -119,7 +103,7 @@ public abstract class GitHubConnectionParameters {
     }
 
     @Override
-    protected void applyToGitHubClient(@NotNull final GitHubClient client) {
+    public void applyCredentials(@NotNull final GitHubClient client) {
       client.setCredentials(null, null);
     }
   }

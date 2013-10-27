@@ -17,17 +17,18 @@
 import com.intellij.openapi.util.io.FileUtil;
 import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.util.PropertiesUtil;
-import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
+import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
+import jetbrains.teamcilty.github.api.impl.GitHubApiFactoryImpl;
+import jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl;
 import org.apache.http.auth.AuthenticationException;
 import org.eclipse.egit.github.core.CommitStatus;
 import org.eclipse.egit.github.core.RepositoryId;
 import org.jetbrains.annotations.NotNull;
 import org.testng.Assert;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
@@ -50,7 +51,7 @@ public class GitHubApiTest extends BaseTestCase {
   private GitHubApi myApi;
   private RepositoryId myRepositoryId;
 
-  @BeforeMethod
+  @BeforeClass
   @Override
   protected void setUp() throws Exception {
     super.setUp();
@@ -62,7 +63,8 @@ public class GitHubApiTest extends BaseTestCase {
     final String repoOwner = ps.getProperty(OWNER, user);
     myRepositoryId = RepositoryId.create(repoOwner, repoName);
     final String token = ps.getProperty(TOKEN);
-    myApi = new GitHubApiImpl(new GitHubConnectionParameters.OAuth2(ps.getProperty(URL), token));
+    final GitHubApiFactoryImpl factory = new GitHubApiFactoryImpl(new HttpClientWrapperImpl());
+    myApi = factory.openGitHub(new GitHubConnectionParameters.OAuth2(ps.getProperty(URL), token));
   }
 
   private static String rewind(String s) {
