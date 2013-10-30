@@ -19,6 +19,7 @@ package jetbrains.teamcilty.github.api;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +46,18 @@ public abstract class GitHubConnectionParameters {
   @NotNull
   public String getUrl() {
     return myUrl;
+  }
+
+  @NotNull
+  public URI getURI() throws IllegalStateException {
+    URI uri;
+    try {
+      uri = URI.create(myUrl);
+      uri = Util.fixURI(uri);
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException("Url looks invalid. Cannot create URI.", e);
+    }
+    return uri;
   }
 
   public abstract void applyCredentials(@NotNull final GitHubClient client);

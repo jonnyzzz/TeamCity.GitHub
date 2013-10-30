@@ -1,0 +1,14 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="TeamCity.GitHub plugin tests">
+  <test name="Full tests">
+    <classes>
+      <class name="SimpleTest"/>
+      <class name="HostMatherTest"/>
+      <class name="jetbrains.teamcilty.github.api.UtilTest"/>
+      <class name="GitHubApiTest"/>
+      <class name="SSLTest"/>
+    </classes>
+  </test>
+</suite>
+
+

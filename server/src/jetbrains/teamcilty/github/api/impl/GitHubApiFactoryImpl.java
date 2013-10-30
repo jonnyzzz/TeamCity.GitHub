@@ -23,6 +23,8 @@ import jetbrains.teamcilty.github.api.GitHubConnectionParameters;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URI;
+
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
  * Date: 06.09.12 2:54
@@ -36,12 +38,8 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
 
   @NotNull
   public GitHubApi openGitHub(@NotNull final GitHubConnectionParameters parameters) {
-    GitHubClient client;
-    try {
-      client = ApacheHttpBasedGitHubClient.createClient(parameters.getUrl(), myWrapper);
-    } catch (IllegalArgumentException e) {
-      client = new ApacheHttpBasedGitHubClient(myWrapper, GitHubConnectionParameters.getHost(parameters.getUrl()));
-    }
+    final URI uri = parameters.getURI();
+    final GitHubClient client = ApacheHttpBasedGitHubClient.createClient(uri, myWrapper);
     client.setUserAgent("JetBrains TeamCity " + ServerVersionHolder.getVersion().getDisplayVersion());
     parameters.applyCredentials(client);
     return new GitHubApiImpl(client);
