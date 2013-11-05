@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github.api.impl;
 
 import jetbrains.buildServer.util.StringUtil;
+import jetbrains.teamcilty.github.api.Util;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
@@ -27,37 +28,34 @@ import org.eclipse.egit.github.core.client.GitHubRequest;
 import org.eclipse.egit.github.core.client.GitHubResponse;
 import org.eclipse.egit.github.core.client.RequestException;
 import org.eclipse.egit.github.core.util.EncodingUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 
 import static org.eclipse.egit.github.core.client.IGitHubConstants.*;
 
 public class ApacheHttpBasedGitHubClient extends GitHubClient {
-  private final HttpClientWrapper myWrapper;
-  private String myCredentials;
-  private String myUserAgent;
-  private int myRemainingRequests;
-  private int myRequestLimit;
-  private String myUser;
+  protected final HttpClientWrapper myWrapper;
+  protected final URI myBaseUri;
+  protected String myCredentials;
+  protected String myUserAgent;
+  protected int myRemainingRequests;
+  protected int myRequestLimit;
+  protected String myUser;
 
-  public ApacheHttpBasedGitHubClient(HttpClientWrapper wrapper, String hostname) {
-    super(hostname);
+  protected ApacheHttpBasedGitHubClient(@NotNull HttpClientWrapper wrapper, @NotNull URI uri) {
+    super();
     myWrapper = wrapper;
+    myBaseUri = uri;
   }
 
-  public static GitHubClient createClient(String url, HttpClientWrapper wrapper) {
-    try {
-      String host = new URL(url).getHost();
-      if (HOST_DEFAULT.equals(host) || HOST_GISTS.equals(host))
-        host = HOST_API;
-      return new ApacheHttpBasedGitHubClient(wrapper, host);
-    } catch (IOException e) {
-      throw new IllegalArgumentException(e);
-    }
+  public static ApacheHttpBasedGitHubClient createClient(@NotNull URI uri, @NotNull HttpClientWrapper wrapper) {
+    uri = Util.fixURI(uri);
+    return new ApacheHttpBasedGitHubClient(wrapper, uri);
   }
 
   protected <T extends HttpRequestBase> T configureRequest(T request) {
@@ -82,7 +80,7 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
 
   @Override
   public void delete(String uri, Object params) throws IOException {
-    final HttpDeleteWithBody request = new HttpDeleteWithBody(URI.create(createUri(uri)));
+    final HttpDeleteWithBody request = new HttpDeleteWithBody(getUri(uri));
     configureRequest(request);
 
     if (params != null) {
@@ -109,7 +107,7 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
 
   @Override
   public GitHubResponse get(GitHubRequest request) throws IOException {
-    final HttpGet get = new HttpGet(URI.create(createUri(request.generateUri())));
+    final HttpGet get = new HttpGet(getUri(request.generateUri()));
     configureRequest(get);
 
     final String accept = request.getResponseContentType();
@@ -137,14 +135,14 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
 
   @Override
   public <V> V post(String uri, Object params, Type type) throws IOException {
-    HttpPost request = new HttpPost(URI.create(createUri(uri)));
+    HttpPost request = new HttpPost(getUri(uri));
     configureRequest(request);
     return sendJson(request, params, type);
   }
 
   @Override
   public <V> V put(String uri, Object params, Type type) throws IOException {
-    HttpPut request = new HttpPut(URI.create(createUri(uri)));
+    HttpPut request = new HttpPut(getUri(uri));
     configureRequest(request);
 
     return sendJson(request, params, type);
@@ -213,7 +211,7 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
 
   @Override
   public InputStream postStream(String uri, Object params) throws IOException {
-    final HttpPost post = new HttpPost(URI.create(createUri(uri)));
+    final HttpPost post = new HttpPost(getUri(uri));
     configureRequest(post);
     sendParams(post, params);
     final HttpResponse response = myWrapper.execute(post);
@@ -233,7 +231,7 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
 
   @Override
   public InputStream getStream(GitHubRequest request) throws IOException {
-    final HttpGet get = new HttpGet(URI.create(createUri(request.generateUri())));
+    final HttpGet get = new HttpGet(getUri(request.generateUri()));
     configureRequest(get);
     final HttpResponse response = myWrapper.execute(get);
     return getResponseStream(response);
@@ -282,5 +280,17 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
   @Override
   public void delete(String uri) throws IOException {
     delete(uri, null);
+  }
+
+  @NotNull
+  protected URI getUri(@NotNull String path) {
+    if (!path.startsWith("/")) path = '/' + path;
+    String p = myBaseUri.getPath() + path;
+    p = p.replace("//", "/");
+    try {
+      return new URI(myBaseUri.getScheme(), myBaseUri.getUserInfo(), myBaseUri.getHost(), myBaseUri.getPort(), p, myBaseUri.getQuery(), myBaseUri.getFragment());
+    } catch (URISyntaxException e) {
+      return URI.create(myBaseUri.toString() + path);
+    }
   }
 }
