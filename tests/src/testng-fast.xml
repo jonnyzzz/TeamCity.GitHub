@@ -5,6 +5,7 @@
       <class name="SimpleTest"/>
       <class name="HostMatherTest"/>
       <class name="jetbrains.teamcilty.github.api.UtilTest"/>
+      <class name="jetbrains.teamcilty.github.api.impl.ApacheHttpBasedGitHubClientTest"/>
     </classes>
   </test>
 </suite>

@@ -22,8 +22,14 @@ public class Util {
       } else if (original.isAbsolute()) {
         throw new IllegalArgumentException("Invalid URI: Host name is empty, but uri is absolute. Original uri " + original);
       }
-      host = path;
-      path = null;
+      int i = path.indexOf('/');
+      if (i >= 0) {
+        host = path.substring(0, i);
+        path = path.substring(i);
+      } else {
+        host = path;
+        path = null;
+      }
     }
     if (isEmptyOrSpaces(scheme)) {
       scheme = "https";
@@ -31,11 +37,10 @@ public class Util {
     if (HOST_DEFAULT.equals(host) || HOST_GISTS.equals(host)) {
       // Change host, use SEGMENT_V3_API as path
       host = HOST_API;
-      if (isEmptyOrSpaces(path)) {
-        path = SEGMENT_V3_API;
-      }
     }
-
+    if (isEmptyOrSpaces(path)) {
+      path = SEGMENT_V3_API;
+    }
     URI url;
     try {
       url = new URI(scheme, null, host, port, path, null, null);

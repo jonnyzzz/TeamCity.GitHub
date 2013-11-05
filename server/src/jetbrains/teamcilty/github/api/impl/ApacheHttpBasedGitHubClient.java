@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import static org.eclipse.egit.github.core.client.IGitHubConstants.*;
 
@@ -282,7 +283,14 @@ public class ApacheHttpBasedGitHubClient extends GitHubClient {
   }
 
   @NotNull
-  protected URI getUri(@NotNull final String path) {
-    return myBaseUri.resolve(path);
+  protected URI getUri(@NotNull String path) {
+    if (!path.startsWith("/")) path = '/' + path;
+    String p = myBaseUri.getPath() + path;
+    p = p.replace("//", "/");
+    try {
+      return new URI(myBaseUri.getScheme(), myBaseUri.getUserInfo(), myBaseUri.getHost(), myBaseUri.getPort(), p, myBaseUri.getQuery(), myBaseUri.getFragment());
+    } catch (URISyntaxException e) {
+      return URI.create(myBaseUri.toString() + path);
+    }
   }
 }
