@@ -99,9 +99,11 @@ public class GitHubApiImpl implements GitHubApi {
     setDefaultHeaders(post);
 
     try {
+      logRequest(post, null);
+
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(post, null, execute);
+        logFailedResponse(post, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
       return "TBD";
@@ -128,9 +130,10 @@ public class GitHubApiImpl implements GitHubApi {
       includeAuthentication(post);
       setDefaultHeaders(post);
 
+      logRequest(post, requestEntity.getText());
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(post, requestEntity.getText(), execute);
+        logFailedResponse(post, requestEntity.getText(), execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
     } finally {
@@ -191,15 +194,17 @@ public class GitHubApiImpl implements GitHubApi {
   private <T> T processResponse(@NotNull HttpUriRequest request, @NotNull final Class<T> clazz) throws IOException {
     setDefaultHeaders(request);
     try {
+      logRequest(request, null);
+
       final HttpResponse execute = myClient.execute(request);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_OK) {
-        logFailedRequest(request, null, execute);
+        logFailedResponse(request, null, execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
 
       final HttpEntity entity = execute.getEntity();
       if (entity == null) {
-        logFailedRequest(request, null, execute);
+        logFailedResponse(request, null, execute);
         throw new IOException("Failed to complete request to GitHub. Empty response. Status: " + execute.getStatusLine());
       }
 
@@ -225,9 +230,9 @@ public class GitHubApiImpl implements GitHubApi {
     }
   }
 
-  private void logFailedRequest(@NotNull HttpUriRequest requestUrl,
-                                @Nullable String requestEntity,
-                                @NotNull HttpResponse execute) throws IOException {
+  private void logFailedResponse(@NotNull HttpUriRequest request,
+                                 @Nullable String requestEntity,
+                                 @NotNull HttpResponse execute) throws IOException {
     String responseText = extractResponseEntity(execute);
     if (responseText == null) {
       responseText = "<none>";
@@ -236,12 +241,27 @@ public class GitHubApiImpl implements GitHubApi {
       requestEntity = "<none>";
     }
 
-    LOG.debug("Failed to complete query to GitHub with:\n" +
-            "  requestURL: " + requestUrl.getURI().toString() + "\n" +
-            "  requestMethod: " + requestUrl.getMethod() + "\n" +
+    LOG.warn("Failed to complete query to GitHub with:\n" +
+            "  requestURL: " + request.getURI().toString() + "\n" +
+            "  requestMethod: " + request.getMethod() + "\n" +
             "  requestEntity: " + requestEntity + "\n" +
             "  response: " + execute.getStatusLine() + "\n" +
             "  responseEntity: " + responseText
+    );
+  }
+
+  private void logRequest(@NotNull HttpUriRequest request,
+                          @Nullable String requestEntity) throws IOException {
+    if (!LOG.isDebugEnabled()) return;
+
+    if (requestEntity == null) {
+      requestEntity = "<none>";
+    }
+
+    LOG.debug("Failed to complete query to GitHub with:\n" +
+            "  requestURL: " + request.getURI().toString() + "\n" +
+            "  requestMethod: " + request.getMethod() + "\n" +
+            "  requestEntity: " + requestEntity
     );
   }
 
@@ -276,9 +296,11 @@ public class GitHubApiImpl implements GitHubApi {
       includeAuthentication(post);
       setDefaultHeaders(post);
 
+      logRequest(post, requestEntity.getText());
+
       final HttpResponse execute = myClient.execute(post);
       if (execute.getStatusLine().getStatusCode() != HttpURLConnection.HTTP_CREATED) {
-        logFailedRequest(post, requestEntity.getText(), execute);
+        logFailedResponse(post, requestEntity.getText(), execute);
         throw new IOException("Failed to complete request to GitHub. Status: " + execute.getStatusLine());
       }
     } finally {
