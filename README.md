@@ -2,6 +2,17 @@ TeamCity.GitHub
 ===============
 Integration of TeamCity and GitHub.
 
+Branches
+========
+We maintain two branches `master` and `stable`. Development is done in `master`. 
+Plugin from `stable` branch is expected to be more stable and feature-lacking
+
+It is highly recommended to use builds from `master` branch
+
+Try the build from `master` first. 
+If you see problems, please report them as issues first. 
+If urget fix is required, than try a build from `stable` branch
+
 What is supported
 =================
 The aim to create the plugin was to support GitHub Change Status API in TeamCity.
