@@ -60,8 +60,9 @@ public class HttpClientWrapperImpl implements HttpClientWrapper {
     final HttpParams ps = new BasicHttpParams();
 
     DefaultHttpClient.setDefaultHttpParams(ps);
-    HttpConnectionParams.setConnectionTimeout(ps, 300 * 1000);
-    HttpConnectionParams.setSoTimeout(ps, 300 * 1000);
+    final int timeout = TeamCityProperties.getInteger("teamcity.github.http.timeout", 300 * 1000);
+    HttpConnectionParams.setConnectionTimeout(ps, timeout);
+    HttpConnectionParams.setSoTimeout(ps, timeout);
     HttpProtocolParams.setUserAgent(ps, "JetBrains TeamCity " + serverVersion);
 
     final SchemeRegistry schemaRegistry = SchemeRegistryFactory.createDefault();
