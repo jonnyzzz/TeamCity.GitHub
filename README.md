@@ -29,7 +29,7 @@ I set up TeamCity build configuration for it [here](http://teamcity.jetbrains.co
 
 To install plugin, put downloaded ```.zip``` file into `<TeamCity Data Directory>/plugins` folder and restart the server
 
-Letst build of the plugin could be downloaded from [TeamCity's build artifact](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/99290:id/teamcity.github.zip)
+Letst build of the plugin could be downloaded from [TeamCity's build artifact](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/lastest.lastSuccessful/teamcity.github.zip)
 
 **NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`)
 
