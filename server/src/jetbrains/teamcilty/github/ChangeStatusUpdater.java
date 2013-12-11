@@ -117,10 +117,10 @@ public class ChangeStatusUpdater {
   }
 
   @NotNull
-  private static String getFriendlyDuration(long millis) {
-    long second = (millis / 1000) % 60;
-    long minute = (millis / (1000 * 60)) % 60;
-    long hour = (millis / (1000 * 60 * 60)) % 24;
+  private static String getFriendlyDuration(final long seconds) {
+    long second = seconds % 60;
+    long minute = (seconds / 60) % 60;
+    long hour = seconds / 60 / 60;
     return hour + ":" + minute + ":" + second;
   }
 
