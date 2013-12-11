@@ -43,12 +43,17 @@ public class ChangeStatusListener {
     myUpdater = updater;
     listener.addListener(new BuildServerAdapter(){
       @Override
-      public void changesLoaded(SRunningBuild build) {
+      public void changesLoaded(@NotNull final SRunningBuild build) {
         updateBuildStatus(build, true);
       }
 
       @Override
-      public void buildFinished(SRunningBuild build) {
+      public void buildInterrupted(@NotNull final SRunningBuild build) {
+        updateBuildStatus(build, false);
+      }
+
+      @Override
+      public void buildFinished(@NotNull final SRunningBuild build) {
         updateBuildStatus(build, false);
       }
     });
