@@ -258,7 +258,7 @@ public class GitHubApiImpl implements GitHubApi {
       requestEntity = "<none>";
     }
 
-    LOG.debug("Failed to complete query to GitHub with:\n" +
+    LOG.debug("Calling GitHub with:\n" +
             "  requestURL: " + request.getURI().toString() + "\n" +
             "  requestMethod: " + request.getMethod() + "\n" +
             "  requestEntity: " + requestEntity
