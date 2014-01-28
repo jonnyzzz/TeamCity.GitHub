@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github;
 
 import jetbrains.buildServer.serverSide.ProjectManager;
+import jetbrains.buildServer.serverSide.SBuildFeatureDescriptor;
 import jetbrains.buildServer.serverSide.SBuildType;
 import jetbrains.buildServer.serverSide.TeamCityProperties;
 import jetbrains.buildServer.usageStatistics.UsageStatisticsProvider;
@@ -42,7 +43,11 @@ public class GitHubUsageStatisticsProvider implements UsageStatisticsProvider, U
 
     int count = 0;
     for (SBuildType buildType : myProjectManager.getActiveBuildTypes()) {
-      if (!buildType.getBuildFeaturesOfType(UpdateChangeStatusFeature.FEATURE_TYPE).isEmpty()) count++;
+      for (SBuildFeatureDescriptor feature : buildType.getBuildFeatures()) {
+        if (UpdateChangeStatusFeature.FEATURE_TYPE.equals(feature.getBuildFeature().getType())) {
+          count++;
+        }
+      }
     }
 
     publisher.publishStatistic(TEAMCITY_GITHUB, count);
