@@ -1,6 +1,6 @@
 TeamCity.GitHub
 ===============
-Integration of TeamCity and GitHub.
+Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
 
 Branches
 ========
