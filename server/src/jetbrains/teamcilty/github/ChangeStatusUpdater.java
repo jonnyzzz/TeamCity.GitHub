@@ -121,7 +121,8 @@ public class ChangeStatusUpdater {
     long second = seconds % 60;
     long minute = (seconds / 60) % 60;
     long hour = seconds / 60 / 60;
-    return hour + ":" + minute + ":" + second;
+    
+    return String.format("%02d:%02d:%02d", hour, minute, second);
   }
 
   @NotNull
