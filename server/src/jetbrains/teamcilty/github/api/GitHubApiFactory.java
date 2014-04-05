@@ -28,5 +28,5 @@ public interface GitHubApiFactory {
   @NotNull
   GitHubApi openGitHub(@NotNull final String url,
                        @NotNull final String username,
-                       @NotNull final String password);
+                       final String password);
 }

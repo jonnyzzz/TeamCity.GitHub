@@ -32,7 +32,7 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, @NotNull String password) {
+  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, String password) {
     return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
   }
 }

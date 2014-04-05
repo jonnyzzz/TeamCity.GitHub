@@ -67,7 +67,7 @@ public class GitHubApiImpl implements GitHubApi {
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
                        @NotNull final GitHubApiPaths urls,
                        @NotNull final String userName,
-                       @NotNull final String password) {
+                       final String password) {
     myClient = client;
     myUrls = urls;
     myUserName = userName;

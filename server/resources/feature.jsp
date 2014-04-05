@@ -21,7 +21,7 @@
 <tr>
   <td colspan="2">Specify GitHub repository name and credentials to push status updates to</td>
 </tr>
-<l:settingsGroup title="Authentication">
+<l:settingsGroup title="Main">
 <tr>
   <th>URL:<l:star/></th>
   <td>
@@ -35,32 +35,51 @@
     </span>
   </td>
 </tr>
-<tr>
-  <th>User Name:<l:star/></th>
-  <td>
-    <props:textProperty name="${keys.userNameKey}" className="longField"/>
-    <span class="error" id="error_${keys.userNameKey}"></span>
-    <span class="smallNote">Specify GitHub user name</span>
-  </td>
-</tr>
-<tr>
-  <th>Password:<l:star/></th>
-  <td>
-    <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
-    <span class="error" id="error_${keys.passwordKey}"></span>
-    <span class="smallNote">Specify GitHub password</span>
-  </td>
-</tr>
+
+
   <tr>
-  <th><label for="${keys.useCommentsKey}">Use comments:</label></th>
-  <td>
-    <props:checkboxProperty name="${keys.useCommentsKey}"/>
-    <label for="${keys.useCommentsKey}">Comment pull request with build details</label>
-    <span class="error" id="error_${keys.useCommentsKey}"></span>
-    <span class="smallNote">Adds comments with build details to GitHub change</span>
-  </td>
-</tr>
+    <th><label for="${keys.useCommentsKey}">Use comments:</label></th>
+    <td>
+      <props:checkboxProperty name="${keys.useCommentsKey}"/>
+      <label for="${keys.useCommentsKey}">Comment pull request with build details</label>
+      <span class="error" id="error_${keys.useCommentsKey}"></span>
+      <span class="smallNote">Adds comments with build details to GitHub change</span>
+    </td>
+  </tr>
+
 </l:settingsGroup>
+
+<l:settingsGroup title="Authentication">
+  <tr>
+    <th>User Name:<l:star/></th>
+    <td>
+      <props:textProperty name="${keys.userNameKey}" className="longField"/>
+      <span class="error" id="error_${keys.userNameKey}"></span>
+      <span class="smallNote">Specify GitHub user name</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Password:<l:star/></th>
+    <td>
+      <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
+      <span class="error" id="error_${keys.passwordKey}"></span>
+      <span class="smallNote">Specify GitHub password</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Personal Access Token:</th>
+    <td>
+      <props:passwordProperty name="${keys.accessTokenKey}" className="longField"/>
+      <span class="error" id="error_${keys.accessTokenKey}"></span>
+      <span class="smallNote">Specify Access Token      </span>
+        If a token is specified, it will be used instead of the username and password above.
+
+    </td>
+  </tr>
+
+</l:settingsGroup>
+
+
 <tr>
   <td colspan="2">
     <div class="attentionComment">

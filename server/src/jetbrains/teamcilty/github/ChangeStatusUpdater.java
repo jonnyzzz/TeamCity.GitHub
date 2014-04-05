@@ -143,13 +143,20 @@ public class ChangeStatusUpdater {
 
     final UpdateChangesConstants c = new UpdateChangesConstants();
 
-    String password = "";
-    if (feature.getParameters().get(c.getPasswordKey()) != null) {
-      password = feature.getParameters().get(c.getPasswordKey());
+    // With github, you can simply replace the username with an access token as long
+    // as you send an empty password.  That is what we do here, if an access token
+    // is defined.
+
+    String password = feature.getParameters().get(c.getPasswordKey());
+    String userOrAcessToken = feature.getParameters().get(c.getUserNameKey());
+    if (feature.getParameters().get(c.getAccessTokenKey()) != null) {
+      userOrAcessToken = feature.getParameters().get(c.getAccessTokenKey());
+      password = "";
     }
+
     final GitHubApi api = myFactory.openGitHub(
             feature.getParameters().get(c.getServerKey()),
-            feature.getParameters().get(c.getUserNameKey()),
+            userOrAcessToken,
             password);
     final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());

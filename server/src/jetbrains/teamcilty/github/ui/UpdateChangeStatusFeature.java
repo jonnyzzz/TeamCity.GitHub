@@ -75,11 +75,16 @@ public class UpdateChangeStatusFeature extends BuildFeature {
                                  @NotNull final String key,
                                  @NotNull final String message,
                                  @NotNull final Collection<InvalidProperty> res) {
-        if (StringUtil.isEmptyOrSpaces(properties.get(key))) {
+        if (isEmpty(properties, key)) {
           res.add(new InvalidProperty(key, message));
           return true;
         }
         return false;
+      }
+
+      private boolean isEmpty(@NotNull final Map<String, String> properties,
+                              @NotNull final String key) {
+        return StringUtil.isEmptyOrSpaces(properties.get(key));
       }
 
       @NotNull
@@ -87,7 +92,13 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
         if (p == null) return result;
 
-        checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
+        //We only want to make sure username and password are set if an access token isn't set
+
+        if (isEmpty(p, c.getAccessTokenKey())) {
+          checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
+          checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
+        }
+
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
         checkNotEmpty(p, c.getRepositoryOwnerKey(), "Repository owner must be specified", result);
 
