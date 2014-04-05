@@ -71,7 +71,11 @@ public class GitHubApiImpl implements GitHubApi {
     myClient = client;
     myUrls = urls;
     myUserName = userName;
-    myPassword = password;
+    if (null == password) {
+      myPassword = "";
+    } else {
+      myPassword = password;
+    }
   }
 
   @Nullable
