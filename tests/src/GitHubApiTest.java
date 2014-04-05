@@ -44,9 +44,11 @@ public class GitHubApiTest extends BaseTestCase {
   private static final String REPOSITORY = "repository";
   private static final String OWNER = "owner";
   private static final String PASSWORD_REV = "password-rev";
+  private static final String PR_COMMIT = "prcommit";
   private GitHubApi myApi;
   private String myRepoName;
   private String myRepoOwner;
+  private String myPrCommit;
 
   @BeforeMethod
   @Override
@@ -64,6 +66,7 @@ public class GitHubApiTest extends BaseTestCase {
             new GitHubApiPaths(ps.getProperty(URL)),
             user,
             rewind(ps.getProperty(PASSWORD_REV)));
+    myPrCommit = ps.getProperty(PR_COMMIT);
   }
 
   private static String rewind(String s) {
@@ -95,6 +98,7 @@ public class GitHubApiTest extends BaseTestCase {
         ps.setProperty(USERNAME, "jonnyzzz");
         ps.setProperty(REPOSITORY, "TeamCity.GitHub");
         ps.setProperty(PASSWORD_REV, rewind("some-password-written-end-to-front"));
+        ps.setProperty(PR_COMMIT, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
         PropertiesUtil.storeProperties(ps, propsFile, "mock properties");
         return ps;
       } else {
@@ -132,14 +136,14 @@ public class GitHubApiTest extends BaseTestCase {
   public void test_resolve_pull_request() throws IOException {
     String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
     System.out.println(hash);
-    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+    Assert.assertEquals(hash, myPrCommit);
   }
 
   @Test
   public void test_resolve_pull_request_2() throws IOException {
     String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/head");
     System.out.println(hash);
-    Assert.assertEquals(hash, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+    Assert.assertEquals(hash, myPrCommit);
   }
 
   @Test
