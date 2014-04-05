@@ -142,10 +142,15 @@ public class ChangeStatusUpdater {
     }
 
     final UpdateChangesConstants c = new UpdateChangesConstants();
+
+    String password = "";
+    if (feature.getParameters().get(c.getPasswordKey()) != null) {
+      password = feature.getParameters().get(c.getPasswordKey());
+    }
     final GitHubApi api = myFactory.openGitHub(
             feature.getParameters().get(c.getServerKey()),
             feature.getParameters().get(c.getUserNameKey()),
-            feature.getParameters().get(c.getPasswordKey()));
+            password);
     final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));
