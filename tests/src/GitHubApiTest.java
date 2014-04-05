@@ -111,6 +111,7 @@ public class GitHubApiTest extends BaseTestCase {
         ps.setProperty(REPOSITORY, "TeamCity.GitHub");
         ps.setProperty(PASSWORD_REV, rewind("some-password-written-end-to-front"));
         ps.setProperty(PR_COMMIT, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+        ps.setProperty(ACCESS_TOKEN, "insert a github personal access token here");
         PropertiesUtil.storeProperties(ps, propsFile, "mock properties");
         return ps;
       } else {
