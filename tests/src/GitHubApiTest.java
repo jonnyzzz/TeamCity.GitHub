@@ -20,9 +20,7 @@ import jetbrains.buildServer.util.PropertiesUtil;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
-import jetbrains.teamcilty.github.api.impl.GitHubApiPaths;
-import jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl;
+import jetbrains.teamcilty.github.api.impl.*;
 import org.apache.http.auth.AuthenticationException;
 import org.jetbrains.annotations.NotNull;
 import org.testng.Assert;
@@ -45,7 +43,9 @@ public class GitHubApiTest extends BaseTestCase {
   private static final String OWNER = "owner";
   private static final String PASSWORD_REV = "password-rev";
   private static final String PR_COMMIT = "prcommit";
+  private static final String ACCESS_TOKEN = "githubtoken";
   private GitHubApi myApi;
+  private GitHubApi accessTokenApi;
   private String myRepoName;
   private String myRepoOwner;
   private String myPrCommit;
@@ -64,8 +64,14 @@ public class GitHubApiTest extends BaseTestCase {
     myApi = new GitHubApiImpl(
             new HttpClientWrapperImpl(),
             new GitHubApiPaths(ps.getProperty(URL)),
-            user,
-            rewind(ps.getProperty(PASSWORD_REV)));
+            new GitHubApiPasswordAuthentication(user, rewind(ps.getProperty(PASSWORD_REV)))
+    );
+
+    accessTokenApi = new GitHubApiImpl(
+            new HttpClientWrapperImpl(),
+            new GitHubApiPaths(ps.getProperty(URL)),
+            new GitHubApiTokenAuthentication(ps.getProperty(ACCESS_TOKEN)));
+
     myPrCommit = ps.getProperty(PR_COMMIT);
   }
 
@@ -81,9 +87,10 @@ public class GitHubApiTest extends BaseTestCase {
    * It's not possible to store username/password in the test file,
    * this cretentials are stored in a properties file
    * under user home directory.
-   *
+   * <p/>
    * This method would be used to fetch parameters for the test
    * and allow to avoid committing createntials with source file.
+   *
    * @return username, repo, password
    */
   @NotNull
@@ -99,6 +106,7 @@ public class GitHubApiTest extends BaseTestCase {
         ps.setProperty(REPOSITORY, "TeamCity.GitHub");
         ps.setProperty(PASSWORD_REV, rewind("some-password-written-end-to-front"));
         ps.setProperty(PR_COMMIT, "4e86fc6dcef23c733f36bc8bbf35fb292edc9cdb");
+        ps.setProperty(ACCESS_TOKEN, "insert a github personal access token here");
         PropertiesUtil.storeProperties(ps, propsFile, "mock properties");
         return ps;
       } else {
@@ -111,12 +119,28 @@ public class GitHubApiTest extends BaseTestCase {
 
   @Test
   public void test_read_status() throws IOException {
-    myApi.readChangeStatus(myRepoOwner, myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9");
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    String change = myApi.readChangeStatus(myRepoOwner, myRepoName, hash);
+    System.out.println(change);
   }
 
   @Test
   public void test_set_status() throws IOException, AuthenticationException {
-    myApi.setChangeStatus(myRepoOwner, myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9",
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    myApi.setChangeStatus(myRepoOwner, myRepoName, hash,
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status"
+    );
+  }
+
+  @Test
+  public void test_set_status_with_token() throws IOException, AuthenticationException {
+    String hash = accessTokenApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    myApi.setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status"
@@ -125,7 +149,9 @@ public class GitHubApiTest extends BaseTestCase {
 
   @Test
   public void test_set_longer_status() throws IOException, AuthenticationException {
-    myApi.setChangeStatus(myRepoOwner, myRepoName, "605e36e23f7a64515691da631190baaf45fdaed9",
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    myApi.setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status" + StringUtil.repeat("test", " ", 1000)
@@ -165,7 +191,10 @@ public class GitHubApiTest extends BaseTestCase {
   @Test
   public void test_parent_hashes() throws IOException {
     enableDebug();
-    Collection<String> parents = myApi.getCommitParents(myRepoOwner, myRepoName, "4664d7fa1b9fa71ea7c7958c126a05ea5d0d64f9");
+    String hash = myApi.findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    Collection<String> parents = myApi.getCommitParents(myRepoOwner, myRepoName, hash);
     System.out.println(parents);
   }
+
 }

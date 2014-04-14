@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
+import jetbrains.teamcilty.github.api.GitHubApiAuthentication;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.data.*;
 import jetbrains.teamcilty.github.util.LoggerHelper;
@@ -61,17 +62,15 @@ public class GitHubApiImpl implements GitHubApi {
   private final HttpClientWrapper myClient;
   private final Gson myGson = new Gson();
   private final GitHubApiPaths myUrls;
-  private final String myUserName;
-  private final String myPassword;
+  private GitHubApiAuthentication myGitHubApiAuthentication;
 
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
                        @NotNull final GitHubApiPaths urls,
-                       @NotNull final String userName,
-                       @NotNull final String password) {
+                       @NotNull final GitHubApiAuthentication gitHubApiAuthentication
+  ) {
     myClient = client;
     myUrls = urls;
-    myUserName = userName;
-    myPassword = password;
+    myGitHubApiAuthentication = gitHubApiAuthentication;
   }
 
   @Nullable
@@ -224,7 +223,7 @@ public class GitHubApiImpl implements GitHubApi {
 
   private void includeAuthentication(@NotNull HttpRequest request) throws IOException {
     try {
-      request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), request));
+      request.addHeader(new BasicScheme().authenticate(myGitHubApiAuthentication.buildCredentials(), request));
     } catch (AuthenticationException e) {
       throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
     }

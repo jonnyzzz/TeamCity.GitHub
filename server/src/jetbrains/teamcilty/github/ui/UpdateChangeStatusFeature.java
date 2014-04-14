@@ -21,6 +21,7 @@ import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.util.StringUtil;
+import jetbrains.teamcilty.github.api.GitHubApiAuthenticationType;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -75,11 +76,16 @@ public class UpdateChangeStatusFeature extends BuildFeature {
                                  @NotNull final String key,
                                  @NotNull final String message,
                                  @NotNull final Collection<InvalidProperty> res) {
-        if (StringUtil.isEmptyOrSpaces(properties.get(key))) {
+        if (isEmpty(properties, key)) {
           res.add(new InvalidProperty(key, message));
           return true;
         }
         return false;
+      }
+
+      private boolean isEmpty(@NotNull final Map<String, String> properties,
+                              @NotNull final String key) {
+        return StringUtil.isEmptyOrSpaces(properties.get(key));
       }
 
       @NotNull
@@ -87,8 +93,16 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
         if (p == null) return result;
 
-        checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
-        checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
+        GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(p.get(c.getAuthenticationTypeKey()));
+        if (authenticationType == GitHubApiAuthenticationType.PASSWORD_AUTH) {
+          checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
+          checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
+        }
+
+        if (authenticationType == GitHubApiAuthenticationType.TOKEN_AUTH) {
+          checkNotEmpty(p, c.getAccessTokenKey(), "Personal Access Token must be specified", result);
+        }
+
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
         checkNotEmpty(p, c.getRepositoryOwnerKey(), "Repository owner must be specified", result);
 
