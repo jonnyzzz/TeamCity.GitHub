@@ -30,4 +30,5 @@ public class UpdateChangesConstants {
   public String getRepositoryOwnerKey() { return "guthub_owner"; }
   public String getUseCommentsKey() { return "guthub_comments"; }
   public String getAccessTokenKey() { return Constants.SECURE_PROPERTY_PREFIX +"github_access_token"; }
+  public String getAuthenticationTypeKey() { return "guthub_authentication_type";}
 }

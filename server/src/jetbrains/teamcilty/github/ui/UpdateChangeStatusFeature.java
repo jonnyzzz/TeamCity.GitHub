@@ -21,6 +21,7 @@ import jetbrains.buildServer.serverSide.BuildFeature;
 import jetbrains.buildServer.serverSide.InvalidProperty;
 import jetbrains.buildServer.serverSide.PropertiesProcessor;
 import jetbrains.buildServer.util.StringUtil;
+import jetbrains.teamcilty.github.api.GitHubApiAuthenticationType;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -92,11 +93,14 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
         if (p == null) return result;
 
-        //We only want to make sure username and password are set if an access token isn't set
-
-        if (isEmpty(p, c.getAccessTokenKey())) {
+        GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(p.get(c.getAuthenticationTypeKey()));
+        if (authenticationType == GitHubApiAuthenticationType.PASSWORD_AUTH) {
           checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
           checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
+        }
+
+        if (authenticationType == GitHubApiAuthenticationType.TOKEN_AUTH) {
+          checkNotEmpty(p, c.getAccessTokenKey(), "Personal Access Token must be specified", result);
         }
 
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);

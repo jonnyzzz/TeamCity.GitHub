@@ -1,4 +1,4 @@
-<%@ include file="/include-internal.jsp"%>
+<%@ include file="/include-internal.jsp" %>
 <%@ taglib prefix="props" tagdir="/WEB-INF/tags/props" %>
 <%--
   ~ Copyright 2000-2012 JetBrains s.r.o.
@@ -22,19 +22,20 @@
   <td colspan="2">Specify GitHub repository name and credentials to push status updates to</td>
 </tr>
 <l:settingsGroup title="Main">
-<tr>
-  <th>URL:<l:star/></th>
-  <td>
-    <props:textProperty name="${keys.serverKey}" className="longField"/>
-    <span class="error" id="error_${keys.serverKey}"></span>
+  <tr>
+    <th>URL:<l:star/></th>
+    <td>
+      <props:textProperty name="${keys.serverKey}" className="longField"/>
+      <span class="error" id="error_${keys.serverKey}"></span>
     <span class="smallNote">
       Specify GitHub instance URL.
       <br/>
       Use <strong>http(s)://[hostname]/api/v3</strong>
-      for <a href="https://support.enterprise.github.com/entries/21391237-Using-the-API" target="_blank">GitHub Enterprise</a>
+      for <a href="https://support.enterprise.github.com/entries/21391237-Using-the-API" target="_blank">GitHub
+      Enterprise</a>
     </span>
-  </td>
-</tr>
+    </td>
+  </tr>
 
 
   <tr>
@@ -51,6 +52,16 @@
 
 <l:settingsGroup title="Authentication">
   <tr>
+    <th>Authentication Type</th>
+    <td>
+      <props:selectProperty name="${keys.authenticationTypeKey}" id="authenticationType">
+        <props:option value="PASSWORD_AUTH">Password</props:option>
+        <props:option value="TOKEN_AUTH">Personal Access Token</props:option>
+      </props:selectProperty>
+    </td>
+  </tr>
+
+  <tr id="authUsernameRow">
     <th>User Name:<l:star/></th>
     <td>
       <props:textProperty name="${keys.userNameKey}" className="longField"/>
@@ -58,7 +69,7 @@
       <span class="smallNote">Specify GitHub user name</span>
     </td>
   </tr>
-  <tr>
+  <tr id="authPasswordRow">
     <th>Password:<l:star/></th>
     <td>
       <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
@@ -66,13 +77,13 @@
       <span class="smallNote">Specify GitHub password</span>
     </td>
   </tr>
-  <tr>
+
+  <tr id="authTokenRow">
     <th>Personal Access Token:</th>
     <td>
       <props:passwordProperty name="${keys.accessTokenKey}" className="longField"/>
       <span class="error" id="error_${keys.accessTokenKey}"></span>
       <span class="smallNote">Specify Access Token      </span>
-        If a token is specified, it will be used instead of the username and password above.
 
     </td>
   </tr>
@@ -85,25 +96,46 @@
     <div class="attentionComment">
       TeamCity Server URL<bs:help file="Configuring+Server+URL"/> will be used in GitHub status.
       Make sure this URL is specified correctly. To change it use
-      <a href="<c:url value='/admin/admin.html?item=serverConfigGeneral'/>" target="_blank">Server Configuration page</a>.
+      <a href="<c:url value='/admin/admin.html?item=serverConfigGeneral'/>" target="_blank">Server Configuration
+        page</a>.
     </div>
   </td>
 </tr>
 <l:settingsGroup title="Repository">
-<tr>
-  <th>Owner:<l:star/></th>
-  <td>
-    <props:textProperty name="${keys.repositoryOwnerKey}" className="longField"/>
-    <span class="error" id="error_${keys.repositoryOwnerKey}"></span>
-    <span class="smallNote">Specify GitHub repository owner name (user or organization)</span>
-  </td>
-</tr>
-<tr>
-  <th>Repository:<l:star/></th>
-  <td>
-    <props:textProperty name="${keys.repositoryNameKey}" className="longField"/>
-    <span class="error" id="error_${keys.repositoryNameKey}"></span>
-    <span class="smallNote">Specify GitHub repository name to push change statuses to</span>
-  </td>
-</tr>
+  <tr>
+    <th>Owner:<l:star/></th>
+    <td>
+      <props:textProperty name="${keys.repositoryOwnerKey}" className="longField"/>
+      <span class="error" id="error_${keys.repositoryOwnerKey}"></span>
+      <span class="smallNote">Specify GitHub repository owner name (user or organization)</span>
+    </td>
+  </tr>
+  <tr>
+    <th>Repository:<l:star/></th>
+    <td>
+      <props:textProperty name="${keys.repositoryNameKey}" className="longField"/>
+      <span class="error" id="error_${keys.repositoryNameKey}"></span>
+      <span class="smallNote">Specify GitHub repository name to push change statuses to</span>
+    </td>
+  </tr>
 </l:settingsGroup>
+
+
+<script type="text/javascript">
+  (function () {
+    var update = function () {
+      var authType = $j("#authenticationType").val();
+      if (authType == "PASSWORD_AUTH") {
+        BS.Util.hide('authTokenRow');
+        BS.Util.show('authUsernameRow','authPasswordRow');
+      }
+      if (authType == "TOKEN_AUTH") {
+        BS.Util.show('authTokenRow');
+        BS.Util.hide('authUsernameRow','authPasswordRow');
+      }
+    };
+
+    $j("#authenticationType").change(update);
+    $j(document).ready(update);
+  })();
+</script>

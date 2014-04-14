@@ -22,9 +22,9 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.executors.ExecutorServices;
 import jetbrains.buildServer.util.ExceptionUtil;
 import jetbrains.buildServer.util.StringUtil;
-import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubApiFactory;
-import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.api.*;
+import jetbrains.teamcilty.github.api.impl.GitHubApiPasswordAuthentication;
+import jetbrains.teamcilty.github.api.impl.GitHubApiTokenAuthentication;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.ui.UpdateChangesConstants;
 import jetbrains.teamcilty.github.util.LoggerHelper;
@@ -121,7 +121,7 @@ public class ChangeStatusUpdater {
     long second = seconds % 60;
     long minute = (seconds / 60) % 60;
     long hour = seconds / 60 / 60;
-    
+
     return String.format("%02d:%02d:%02d", hour, minute, second);
   }
 
@@ -144,21 +144,24 @@ public class ChangeStatusUpdater {
 
     final UpdateChangesConstants c = new UpdateChangesConstants();
 
-    // With github, you can simply replace the username with an access token as long
-    // as you send an empty password.  That is what we do here, if an access token
-    // is defined.
+    GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(feature.getParameters().get(c.getAuthenticationTypeKey()));
+    GitHubApiAuthentication apiAuthentication = null;
 
-    String password = feature.getParameters().get(c.getPasswordKey());
-    String userOrAcessToken = feature.getParameters().get(c.getUserNameKey());
-    if (feature.getParameters().get(c.getAccessTokenKey()) != null) {
-      userOrAcessToken = feature.getParameters().get(c.getAccessTokenKey());
-      password = "";
+    switch (authenticationType) {
+      case PASSWORD_AUTH:
+        String username = feature.getParameters().get(c.getUserNameKey());
+        String password = feature.getParameters().get(c.getPasswordKey());
+        apiAuthentication = new GitHubApiPasswordAuthentication(username, password);
+      case TOKEN_AUTH:
+        String token = feature.getParameters().get(c.getAccessTokenKey());
+        apiAuthentication = new GitHubApiTokenAuthentication(token);
     }
 
     final GitHubApi api = myFactory.openGitHub(
             feature.getParameters().get(c.getServerKey()),
-            userOrAcessToken,
-            password);
+            apiAuthentication
+    );
+
     final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));

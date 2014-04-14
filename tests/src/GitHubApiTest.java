@@ -20,9 +20,7 @@ import jetbrains.buildServer.util.PropertiesUtil;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
-import jetbrains.teamcilty.github.api.impl.GitHubApiImpl;
-import jetbrains.teamcilty.github.api.impl.GitHubApiPaths;
-import jetbrains.teamcilty.github.api.impl.HttpClientWrapperImpl;
+import jetbrains.teamcilty.github.api.impl.*;
 import org.apache.http.auth.AuthenticationException;
 import org.jetbrains.annotations.NotNull;
 import org.testng.Assert;
@@ -66,16 +64,13 @@ public class GitHubApiTest extends BaseTestCase {
     myApi = new GitHubApiImpl(
             new HttpClientWrapperImpl(),
             new GitHubApiPaths(ps.getProperty(URL)),
-            user,
-            rewind(ps.getProperty(PASSWORD_REV)));
-
-    System.out.println("about to use access token: " + ps.getProperty(ACCESS_TOKEN));
+            new GitHubApiPasswordAuthentication(user, rewind(ps.getProperty(PASSWORD_REV)))
+    );
 
     accessTokenApi = new GitHubApiImpl(
             new HttpClientWrapperImpl(),
             new GitHubApiPaths(ps.getProperty(URL)),
-            ps.getProperty(ACCESS_TOKEN),
-            null);
+            new GitHubApiTokenAuthentication(ps.getProperty(ACCESS_TOKEN)));
 
     myPrCommit = ps.getProperty(PR_COMMIT);
   }

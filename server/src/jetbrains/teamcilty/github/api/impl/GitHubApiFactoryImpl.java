@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github.api.impl;
 
 import jetbrains.teamcilty.github.api.GitHubApi;
+import jetbrains.teamcilty.github.api.GitHubApiAuthentication;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,7 +33,7 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, String password) {
-    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
+  public GitHubApi openGitHub(@NotNull String url, @NotNull GitHubApiAuthentication gitHubApiAuthentication) {
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), gitHubApiAuthentication);
   }
 }
