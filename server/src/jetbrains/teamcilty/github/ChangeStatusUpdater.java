@@ -140,7 +140,7 @@ public class ChangeStatusUpdater {
 
   @NotNull
   private GitHubApiAuthentication getAuthentication(@NotNull final SBuildFeatureDescriptor feature) {
-    final GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(feature.getParameters().get(C.getAuthenticationTypeKey()));
+    final GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.parse(feature.getParameters().get(C.getAuthenticationTypeKey()));
     switch (authenticationType) {
       case PASSWORD_AUTH:
         String username = feature.getParameters().get(C.getUserNameKey());
