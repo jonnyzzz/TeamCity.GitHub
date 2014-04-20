@@ -55,8 +55,8 @@
     <th>Authentication Type</th>
     <td>
       <props:selectProperty name="${keys.authenticationTypeKey}" id="authenticationType">
-        <props:option value="PASSWORD_AUTH">Password</props:option>
-        <props:option value="TOKEN_AUTH">Personal Access Token</props:option>
+        <props:option value="${keys.authenticationTypePasswordValue}">Password</props:option>
+        <props:option value="${keys.authenticationTypeTokenValue}">Personal Access Token</props:option>
       </props:selectProperty>
     </td>
   </tr>
@@ -125,13 +125,12 @@
   (function () {
     var update = function () {
       var authType = $j("#authenticationType").val();
-      if (authType == "PASSWORD_AUTH") {
-        BS.Util.hide('authTokenRow');
-        BS.Util.show('authUsernameRow','authPasswordRow');
-      }
-      if (authType == "TOKEN_AUTH") {
+      if (authType == "${keys.authenticationTypeTokenValue}") {
         BS.Util.show('authTokenRow');
         BS.Util.hide('authUsernameRow','authPasswordRow');
+      } else {
+        BS.Util.hide('authTokenRow');
+        BS.Util.show('authUsernameRow','authPasswordRow');
       }
     };
 

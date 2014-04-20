@@ -17,6 +17,7 @@
 package jetbrains.teamcilty.github.ui;
 
 import jetbrains.buildServer.agent.Constants;
+import jetbrains.teamcilty.github.api.GitHubApiAuthenticationType;
 
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -31,4 +32,6 @@ public class UpdateChangesConstants {
   public String getUseCommentsKey() { return "guthub_comments"; }
   public String getAccessTokenKey() { return Constants.SECURE_PROPERTY_PREFIX +"github_access_token"; }
   public String getAuthenticationTypeKey() { return "guthub_authentication_type";}
+  public String getAuthenticationTypePasswordValue() { return GitHubApiAuthenticationType.PASSWORD_AUTH.getValue();}
+  public String getAuthenticationTypeTokenValue() { return GitHubApiAuthenticationType.TOKEN_AUTH.getValue();}
 }
