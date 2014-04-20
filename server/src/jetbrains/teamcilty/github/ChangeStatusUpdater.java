@@ -41,6 +41,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class ChangeStatusUpdater {
   private static final Logger LOG = LoggerHelper.getInstance(ChangeStatusUpdater.class);
+  private static final UpdateChangesConstants C = new UpdateChangesConstants();
+
   private final ExecutorService myExecutor;
   @NotNull
   private final GitHubApiFactory myFactory;
@@ -137,34 +139,38 @@ public class ChangeStatusUpdater {
   }
 
   @NotNull
+  private GitHubApiAuthentication getAuthentication(@NotNull final SBuildFeatureDescriptor feature) {
+    final GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(feature.getParameters().get(C.getAuthenticationTypeKey()));
+    switch (authenticationType) {
+      case PASSWORD_AUTH:
+        String username = feature.getParameters().get(C.getUserNameKey());
+        String password = feature.getParameters().get(C.getPasswordKey());
+        return new GitHubApiPasswordAuthentication(username, password);
+
+      case TOKEN_AUTH:
+        String token = feature.getParameters().get(C.getAccessTokenKey());
+        return new GitHubApiTokenAuthentication(token);
+
+      default:
+        throw new IllegalArgumentException("Failed to parse authentication type:" + authenticationType);
+    }
+  }
+
+  @NotNull
   public Handler getUpdateHandler(@NotNull final SBuildFeatureDescriptor feature) {
     if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) {
       throw new IllegalArgumentException("Unexpected feature type " + feature.getType());
     }
 
-    final UpdateChangesConstants c = new UpdateChangesConstants();
-
-    GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(feature.getParameters().get(c.getAuthenticationTypeKey()));
-    GitHubApiAuthentication apiAuthentication = null;
-
-    switch (authenticationType) {
-      case PASSWORD_AUTH:
-        String username = feature.getParameters().get(c.getUserNameKey());
-        String password = feature.getParameters().get(c.getPasswordKey());
-        apiAuthentication = new GitHubApiPasswordAuthentication(username, password);
-      case TOKEN_AUTH:
-        String token = feature.getParameters().get(c.getAccessTokenKey());
-        apiAuthentication = new GitHubApiTokenAuthentication(token);
-    }
 
     final GitHubApi api = myFactory.openGitHub(
-            feature.getParameters().get(c.getServerKey()),
-            apiAuthentication
+            feature.getParameters().get(C.getServerKey()),
+            getAuthentication(feature)
     );
 
-    final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
-    final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
-    final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));
+    final String repositoryOwner = feature.getParameters().get(C.getRepositoryOwnerKey());
+    final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
+    final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
