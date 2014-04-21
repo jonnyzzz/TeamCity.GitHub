@@ -22,9 +22,7 @@ import jetbrains.buildServer.serverSide.*;
 import jetbrains.buildServer.serverSide.executors.ExecutorServices;
 import jetbrains.buildServer.util.ExceptionUtil;
 import jetbrains.buildServer.util.StringUtil;
-import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubApiFactory;
-import jetbrains.teamcilty.github.api.GitHubChangeState;
+import jetbrains.teamcilty.github.api.*;
 import jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature;
 import jetbrains.teamcilty.github.ui.UpdateChangesConstants;
 import jetbrains.teamcilty.github.util.LoggerHelper;
@@ -41,6 +39,8 @@ import java.util.concurrent.ExecutorService;
  */
 public class ChangeStatusUpdater {
   private static final Logger LOG = LoggerHelper.getInstance(ChangeStatusUpdater.class);
+  private static final UpdateChangesConstants C = new UpdateChangesConstants();
+
   private final ExecutorService myExecutor;
   @NotNull
   private final GitHubApiFactory myFactory;
@@ -121,7 +121,7 @@ public class ChangeStatusUpdater {
     long second = seconds % 60;
     long minute = (seconds / 60) % 60;
     long hour = seconds / 60 / 60;
-    
+
     return String.format("%02d:%02d:%02d", hour, minute, second);
   }
 
@@ -137,19 +137,39 @@ public class ChangeStatusUpdater {
   }
 
   @NotNull
+  private GitHubApi getGitHubApi(@NotNull final SBuildFeatureDescriptor feature) {
+    final String serverUrl = feature.getParameters().get(C.getServerKey());
+    if (serverUrl == null || StringUtil.isEmptyOrSpaces(serverUrl)) {
+      throw new IllegalArgumentException("Failed to read GitHub URL from the feature settings");
+    }
+
+    final GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.parse(feature.getParameters().get(C.getAuthenticationTypeKey()));
+    switch (authenticationType) {
+      case PASSWORD_AUTH:
+        final String username = feature.getParameters().get(C.getUserNameKey());
+        final String password = feature.getParameters().get(C.getPasswordKey());
+        return myFactory.openGitHubForUser(serverUrl, username, password);
+
+      case TOKEN_AUTH:
+        final String token = feature.getParameters().get(C.getAccessTokenKey());
+        return myFactory.openGitHubForToken(serverUrl, token);
+
+      default:
+        throw new IllegalArgumentException("Failed to parse authentication type:" + authenticationType);
+    }
+  }
+
+  @NotNull
   public Handler getUpdateHandler(@NotNull final SBuildFeatureDescriptor feature) {
     if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) {
       throw new IllegalArgumentException("Unexpected feature type " + feature.getType());
     }
 
-    final UpdateChangesConstants c = new UpdateChangesConstants();
-    final GitHubApi api = myFactory.openGitHub(
-            feature.getParameters().get(c.getServerKey()),
-            feature.getParameters().get(c.getUserNameKey()),
-            feature.getParameters().get(c.getPasswordKey()));
-    final String repositoryOwner = feature.getParameters().get(c.getRepositoryOwnerKey());
-    final String repositoryName = feature.getParameters().get(c.getRepositoryNameKey());
-    final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(c.getUseCommentsKey()));
+    final GitHubApi api = getGitHubApi(feature);
+
+    final String repositoryOwner = feature.getParameters().get(C.getRepositoryOwnerKey());
+    final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
+    final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
     return new Handler() {
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {

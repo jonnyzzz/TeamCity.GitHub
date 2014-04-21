@@ -28,11 +28,9 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
@@ -54,24 +52,19 @@ import java.util.regex.Pattern;
  * @author Tomaz Cerar
  *         Date: 05.09.12 23:39
  */
-public class GitHubApiImpl implements GitHubApi {
+public abstract class GitHubApiImpl implements GitHubApi {
   private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
   private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
-  @NotNull
+
   private final HttpClientWrapper myClient;
-  private final Gson myGson = new Gson();
   private final GitHubApiPaths myUrls;
-  private final String myUserName;
-  private final String myPassword;
+  private final Gson myGson = new Gson();
 
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
-                       @NotNull final GitHubApiPaths urls,
-                       @NotNull final String userName,
-                       @NotNull final String password) {
+                       @NotNull final GitHubApiPaths urls
+  ) {
     myClient = client;
     myUrls = urls;
-    myUserName = userName;
-    myPassword = password;
   }
 
   @Nullable
@@ -224,11 +217,14 @@ public class GitHubApiImpl implements GitHubApi {
 
   private void includeAuthentication(@NotNull HttpRequest request) throws IOException {
     try {
-      request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(myUserName, myPassword), request));
+      setAuthentication(request);
     } catch (AuthenticationException e) {
       throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
     }
   }
+
+  protected abstract void setAuthentication(@NotNull final HttpRequest request) throws AuthenticationException;
+
 
   private void logFailedResponse(@NotNull HttpUriRequest request,
                                  @Nullable String requestEntity,

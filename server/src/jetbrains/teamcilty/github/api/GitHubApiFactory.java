@@ -26,7 +26,11 @@ public interface GitHubApiFactory {
   public static final String DEFAULT_URL = "https://api.github.com";
 
   @NotNull
-  GitHubApi openGitHub(@NotNull final String url,
-                       @NotNull final String username,
-                       @NotNull final String password);
+  GitHubApi openGitHubForUser(@NotNull String url,
+                              @NotNull String username,
+                              @NotNull String password);
+
+  @NotNull
+  GitHubApi openGitHubForToken(@NotNull String url,
+                               @NotNull String token);
 }

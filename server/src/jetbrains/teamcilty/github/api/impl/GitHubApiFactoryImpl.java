@@ -18,6 +18,10 @@ package jetbrains.teamcilty.github.api.impl;
 
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
+import org.apache.http.HttpRequest;
+import org.apache.http.auth.AuthenticationException;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.impl.auth.BasicScheme;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,8 +35,28 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
     myWrapper = wrapper;
   }
 
+
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull String username, @NotNull String password) {
-    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), username, password);
+  public GitHubApi openGitHubForUser(@NotNull final String url,
+                                     @NotNull final String username,
+                                     @NotNull final String password) {
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){
+      @Override
+      protected void setAuthentication(@NotNull HttpRequest request) throws AuthenticationException {
+        request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(username, password), request));
+      }
+    };
+  }
+
+  @NotNull
+  public GitHubApi openGitHubForToken(@NotNull final String url,
+                                      @NotNull final String token) {
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){
+      @Override
+      protected void setAuthentication(@NotNull HttpRequest request) throws AuthenticationException {
+        //NOTE: This auth could also be done via HTTP header
+        request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(token, "x-oauth-basic"), request));
+      }
+    };
   }
 }
