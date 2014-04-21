@@ -94,7 +94,7 @@ public class GitHubApiTest extends BaseTestCase {
    */
   @NotNull
   public static Properties readGitHubAccount() {
-    File propsFile = new File(System.getenv("USERPROFILE"), ".github.test.account");
+    File propsFile = new File(System.getProperty("user.home"), ".github.test.account");
     System.out.println("Loading properites from: " + propsFile);
     try {
       if (!propsFile.exists()) {
