@@ -89,6 +89,10 @@ public class ChangeStatusUpdater {
     final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
     return new Handler() {
+      @NotNull
+      private String getViewResultsUrl(@NotNull final SRunningBuild build) {
+        return myWeb.getViewResultsUrl(build);
+      }
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
@@ -150,7 +154,7 @@ public class ChangeStatusUpdater {
             comment.append(" [Build ");
             comment.append(build.getBuildNumber());
             comment.append("](");
-            comment.append(myWeb.getViewResultsUrl(build));
+            comment.append(getViewResultsUrl(build));
             comment.append(") ");
 
             if (completed) {
@@ -229,7 +233,7 @@ public class ChangeStatusUpdater {
                       repositoryName,
                       hash,
                       status,
-                      myWeb.getViewResultsUrl(build),
+                      getViewResultsUrl(build),
                       message
               );
               LOG.info("Updated GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
