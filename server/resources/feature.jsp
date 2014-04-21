@@ -82,7 +82,7 @@
       </tr>
     </props:selectSectionPropertyContent>
 
-    <props:selectSectionPropertyContent value="${keys.authenticationTypeTokenValue}" caption="Personal Access Token">
+    <props:selectSectionPropertyContent value="${keys.authenticationTypeTokenValue}" caption="Access Token">
       <tr>
         <th>Personal Access Token<l:star/>:</th>
         <td>
