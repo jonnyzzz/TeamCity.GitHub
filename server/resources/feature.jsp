@@ -51,45 +51,41 @@
 </l:settingsGroup>
 
 <l:settingsGroup title="Authentication">
-  <tr>
-    <th>Authentication Type</th>
-    <td>
-      <props:selectProperty name="${keys.authenticationTypeKey}" id="authenticationType">
-        <props:option value="${keys.authenticationTypePasswordValue}">Password</props:option>
-        <props:option value="${keys.authenticationTypeTokenValue}">Personal Access Token</props:option>
-      </props:selectProperty>
-    </td>
-  </tr>
+  <props:selectSectionProperty name="${keys.authenticationTypeKey}" title="Authentication Type">
 
-  <tr id="authUsernameRow">
-    <th>User Name:<l:star/></th>
-    <td>
-      <props:textProperty name="${keys.userNameKey}" className="longField"/>
-      <span class="error" id="error_${keys.userNameKey}"></span>
-      <span class="smallNote">Specify GitHub user name</span>
-    </td>
-  </tr>
-  <tr id="authPasswordRow">
-    <th>Password:<l:star/></th>
-    <td>
-      <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
-      <span class="error" id="error_${keys.passwordKey}"></span>
-      <span class="smallNote">Specify GitHub password</span>
-    </td>
-  </tr>
+    <props:selectSectionPropertyContent value="${keys.authenticationTypePasswordValue}" caption="Password">
+      <tr>
+        <th>User Name<l:star/>:</th>
+        <td>
+          <props:textProperty name="${keys.userNameKey}" className="longField"/>
+          <span class="error" id="error_${keys.userNameKey}"></span>
+          <span class="smallNote">Specify GitHub user name</span>
+        </td>
+      </tr>
+      <tr>
+        <th>Password<l:star/>:</th>
+        <td>
+          <props:passwordProperty name="${keys.passwordKey}" className="longField"/>
+          <span class="error" id="error_${keys.passwordKey}"></span>
+          <span class="smallNote">Specify GitHub password</span>
+        </td>
+      </tr>
+    </props:selectSectionPropertyContent>
 
-  <tr id="authTokenRow">
-    <th>Personal Access Token:</th>
-    <td>
-      <props:passwordProperty name="${keys.accessTokenKey}" className="longField"/>
-      <span class="error" id="error_${keys.accessTokenKey}"></span>
-      <span class="smallNote">Specify Access Token      </span>
-
-    </td>
-  </tr>
-
+    <props:selectSectionPropertyContent value="${keys.authenticationTypeTokenValue}" caption="Personal Access Token">
+      <tr>
+        <th>Personal Access Token<l:star/>:</th>
+        <td>
+          <props:passwordProperty name="${keys.accessTokenKey}" className="longField"/>
+          <span class="error" id="error_${keys.accessTokenKey}"></span>
+          <span class="smallNote">
+            Specify a GitHub <a href="https://github.com/settings/applications" target="_blank">Personal Access Token</a>
+          </span>
+        </td>
+      </tr>
+    </props:selectSectionPropertyContent>
+  </props:selectSectionProperty>
 </l:settingsGroup>
-
 
 <tr>
   <td colspan="2">
@@ -119,22 +115,3 @@
     </td>
   </tr>
 </l:settingsGroup>
-
-
-<script type="text/javascript">
-  (function () {
-    var update = function () {
-      var authType = $j("#authenticationType").val();
-      if (authType == "${keys.authenticationTypeTokenValue}") {
-        BS.Util.show('authTokenRow');
-        BS.Util.hide('authUsernameRow','authPasswordRow');
-      } else {
-        BS.Util.hide('authTokenRow');
-        BS.Util.show('authUsernameRow','authPasswordRow');
-      }
-    };
-
-    $j("#authenticationType").change(update);
-    $j(document).ready(update);
-  })();
-</script>
