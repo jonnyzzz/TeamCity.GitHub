@@ -17,10 +17,10 @@
 package jetbrains.teamcilty.github.api.impl;
 
 import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubApiAuthentication;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import org.apache.http.HttpRequest;
 import org.apache.http.auth.AuthenticationException;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.impl.auth.BasicScheme;
 import org.jetbrains.annotations.NotNull;
 
@@ -40,21 +40,22 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   public GitHubApi openGitHubForUser(@NotNull final String url,
                                      @NotNull final String username,
                                      @NotNull final String password) {
-      return openGitHub(url, new GitHubApiPasswordAuthentication(username, password));
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){
+      @Override
+      protected void setAuthentication(@NotNull HttpRequest request) throws AuthenticationException {
+        request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(username, password), request));
+      }
+    };
   }
 
   @NotNull
   public GitHubApi openGitHubForToken(@NotNull final String url,
-                                     @NotNull final String token) {
-      return openGitHub(url, new GitHubApiTokenAuthentication(token));
-  }
-
-  @NotNull
-  public GitHubApi openGitHub(@NotNull final String url, @NotNull final GitHubApiAuthentication gitHubApiAuthentication) {
+                                      @NotNull final String token) {
     return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){
       @Override
       protected void setAuthentication(@NotNull HttpRequest request) throws AuthenticationException {
-        request.addHeader(new BasicScheme().authenticate(gitHubApiAuthentication.buildCredentials(), request));
+        //NOTE: This auth could also be done via HTTP header
+        request.addHeader(new BasicScheme().authenticate(new UsernamePasswordCredentials(token, "x-oauth-basic"), request));
       }
     };
   }
