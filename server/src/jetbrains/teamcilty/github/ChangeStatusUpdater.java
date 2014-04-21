@@ -55,88 +55,6 @@ public class ChangeStatusUpdater {
   }
 
   @NotNull
-  private String getComment(@NotNull RepositoryVersion version,
-                            @NotNull SRunningBuild build,
-                            boolean completed,
-                            @NotNull String hash) {
-    final StringBuilder comment = new StringBuilder();
-    comment.append("TeamCity ");
-    final SBuildType bt = build.getBuildType();
-    if (bt != null) {
-      comment.append(bt.getFullName());
-    }
-    comment.append(" [Build ");
-    comment.append(build.getBuildNumber());
-    comment.append("](");
-    comment.append(myWeb.getViewResultsUrl(build));
-    comment.append(") ");
-
-    if (completed) {
-      comment.append("outcome was **").append(build.getStatusDescriptor().getStatus().getText()).append("**");
-    } else {
-      comment.append("is now running");
-    }
-
-    comment.append("\n");
-
-    final String text = build.getStatusDescriptor().getText();
-    if (completed && text != null) {
-      comment.append("Summary: ");
-      comment.append(text);
-      comment.append(" Build time: ");
-      comment.append(getFriendlyDuration(build.getDuration()));
-
-      if (build.getBuildStatus() != Status.NORMAL) {
-
-        final List<STestRun> failedTests = build.getFullStatistics().getFailedTests();
-        if (!failedTests.isEmpty()) {
-          comment.append("\n### Failed tests\n");
-          comment.append("```\n");
-
-          for (int i = 0; i < failedTests.size(); i++) {
-            final STestRun testRun = failedTests.get(i);
-            comment.append("");
-            comment.append(testRun.getTest().getName().toString());
-            comment.append(": ");
-            comment.append(getFailureText(testRun.getFailureInfo()));
-            comment.append("\n\n");
-
-            if (i == 10) {
-              comment.append("\n##### there are ")
-                      .append(build.getFullStatistics().getFailedTestCount() - i)
-                      .append(" more failed tests, see build details\n");
-              break;
-            }
-          }
-          comment.append("```\n");
-        }
-      }
-    }
-
-    return comment.toString();
-  }
-
-  @NotNull
-  private static String getFriendlyDuration(final long seconds) {
-    long second = seconds % 60;
-    long minute = (seconds / 60) % 60;
-    long hour = seconds / 60 / 60;
-
-    return String.format("%02d:%02d:%02d", hour, minute, second);
-  }
-
-  @NotNull
-  private static String getFailureText(@Nullable final TestFailureInfo failureInfo) {
-    final String no_data = "<no details avaliable>";
-    if (failureInfo == null) return no_data;
-
-    final String stacktrace = failureInfo.getShortStacktrace();
-    if (stacktrace == null || StringUtil.isEmptyOrSpaces(stacktrace)) return no_data;
-
-    return stacktrace;
-  }
-
-  @NotNull
   private GitHubApi getGitHubApi(@NotNull final SBuildFeatureDescriptor feature) {
     final String serverUrl = feature.getParameters().get(C.getServerKey());
     if (serverUrl == null || StringUtil.isEmptyOrSpaces(serverUrl)) {
@@ -170,7 +88,16 @@ public class ChangeStatusUpdater {
     final String repositoryOwner = feature.getParameters().get(C.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
+    final boolean useGuestUrls = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseGuestUrlsKey()));
     return new Handler() {
+      @NotNull
+      private String getViewResultsUrl(@NotNull final SRunningBuild build) {
+        final String url = myWeb.getViewResultsUrl(build);
+        if (useGuestUrls) {
+          return url + (url.contains("?") ? "&" : "?") + "guest=1";
+        }
+        return url;
+      }
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
@@ -198,6 +125,87 @@ public class ChangeStatusUpdater {
                 "status: " + status);
 
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
+          @NotNull
+          private String getFailureText(@Nullable final TestFailureInfo failureInfo) {
+            final String no_data = "<no details avaliable>";
+            if (failureInfo == null) return no_data;
+
+            final String stacktrace = failureInfo.getShortStacktrace();
+            if (stacktrace == null || StringUtil.isEmptyOrSpaces(stacktrace)) return no_data;
+
+            return stacktrace;
+          }
+
+          @NotNull
+          private String getFriendlyDuration(final long seconds) {
+            long second = seconds % 60;
+            long minute = (seconds / 60) % 60;
+            long hour = seconds / 60 / 60;
+
+            return String.format("%02d:%02d:%02d", hour, minute, second);
+          }
+
+          @NotNull
+          private String getComment(@NotNull RepositoryVersion version,
+                                    @NotNull SRunningBuild build,
+                                    boolean completed,
+                                    @NotNull String hash) {
+            final StringBuilder comment = new StringBuilder();
+            comment.append("TeamCity ");
+            final SBuildType bt = build.getBuildType();
+            if (bt != null) {
+              comment.append(bt.getFullName());
+            }
+            comment.append(" [Build ");
+            comment.append(build.getBuildNumber());
+            comment.append("](");
+            comment.append(getViewResultsUrl(build));
+            comment.append(") ");
+
+            if (completed) {
+              comment.append("outcome was **").append(build.getStatusDescriptor().getStatus().getText()).append("**");
+            } else {
+              comment.append("is now running");
+            }
+
+            comment.append("\n");
+
+            final String text = build.getStatusDescriptor().getText();
+            if (completed && text != null) {
+              comment.append("Summary: ");
+              comment.append(text);
+              comment.append(" Build time: ");
+              comment.append(getFriendlyDuration(build.getDuration()));
+
+              if (build.getBuildStatus() != Status.NORMAL) {
+
+                final List<STestRun> failedTests = build.getFullStatistics().getFailedTests();
+                if (!failedTests.isEmpty()) {
+                  comment.append("\n### Failed tests\n");
+                  comment.append("```\n");
+
+                  for (int i = 0; i < failedTests.size(); i++) {
+                    final STestRun testRun = failedTests.get(i);
+                    comment.append("");
+                    comment.append(testRun.getTest().getName().toString());
+                    comment.append(": ");
+                    comment.append(getFailureText(testRun.getFailureInfo()));
+                    comment.append("\n\n");
+
+                    if (i == 10) {
+                      comment.append("\n##### there are ")
+                              .append(build.getFullStatistics().getFailedTestCount() - i)
+                              .append(" more failed tests, see build details\n");
+                      break;
+                    }
+                  }
+                  comment.append("```\n");
+                }
+              }
+            }
+
+            return comment.toString();
+          }
 
           @NotNull
           private String resolveCommitHash() {
@@ -230,7 +238,7 @@ public class ChangeStatusUpdater {
                       repositoryName,
                       hash,
                       status,
-                      myWeb.getViewResultsUrl(build),
+                      getViewResultsUrl(build),
                       message
               );
               LOG.info("Updated GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
