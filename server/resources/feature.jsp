@@ -44,11 +44,21 @@
       <props:checkboxProperty name="${keys.useCommentsKey}"/>
       <label for="${keys.useCommentsKey}">Comment pull request with build details</label>
       <span class="error" id="error_${keys.useCommentsKey}"></span>
-      <span class="smallNote">Adds comments with build details to GitHub change</span>
     </td>
   </tr>
 
 </l:settingsGroup>
+
+<tr>
+  <td colspan="2">
+    <div class="attentionComment">
+      TeamCity Server URL<bs:help file="Configuring+Server+URL"/> will be used in GitHub status.
+      Make sure this URL is specified correctly. To change it use
+      <a href="<c:url value='/admin/admin.html?item=serverConfigGeneral'/>" target="_blank">Server Configuration
+        page</a>.
+    </div>
+  </td>
+</tr>
 
 <l:settingsGroup title="Authentication">
   <props:selectSectionProperty name="${keys.authenticationTypeKey}" title="Authentication Type">
@@ -91,16 +101,6 @@
   </props:selectSectionProperty>
 </l:settingsGroup>
 
-<tr>
-  <td colspan="2">
-    <div class="attentionComment">
-      TeamCity Server URL<bs:help file="Configuring+Server+URL"/> will be used in GitHub status.
-      Make sure this URL is specified correctly. To change it use
-      <a href="<c:url value='/admin/admin.html?item=serverConfigGeneral'/>" target="_blank">Server Configuration
-        page</a>.
-    </div>
-  </td>
-</tr>
 <l:settingsGroup title="Repository">
   <tr>
     <th>Owner:<l:star/></th>
