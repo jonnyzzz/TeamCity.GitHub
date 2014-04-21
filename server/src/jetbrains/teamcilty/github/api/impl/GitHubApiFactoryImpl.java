@@ -35,6 +35,20 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
     myWrapper = wrapper;
   }
 
+
+  @NotNull
+  public GitHubApi openGitHubForUser(@NotNull final String url,
+                                     @NotNull final String username,
+                                     @NotNull final String password) {
+      return openGitHub(url, new GitHubApiPasswordAuthentication(username, password));
+  }
+
+  @NotNull
+  public GitHubApi openGitHubForToken(@NotNull final String url,
+                                     @NotNull final String token) {
+      return openGitHub(url, new GitHubApiTokenAuthentication(token));
+  }
+
   @NotNull
   public GitHubApi openGitHub(@NotNull final String url, @NotNull final GitHubApiAuthentication gitHubApiAuthentication) {
     return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){

@@ -64,12 +64,12 @@ public class GitHubApiTest extends BaseTestCase {
 
     final GitHubApiFactory factory = new GitHubApiFactoryImpl(new HttpClientWrapperImpl());
 
-    myApi = factory.openGitHub(ps.getProperty(URL),
-            new GitHubApiPasswordAuthentication(user, rewind(ps.getProperty(PASSWORD_REV)))
+    myApi = factory.openGitHubForUser(ps.getProperty(URL),
+            user, rewind(ps.getProperty(PASSWORD_REV))
     );
 
-    accessTokenApi = factory.openGitHub(ps.getProperty(URL),
-            new GitHubApiTokenAuthentication(ps.getProperty(ACCESS_TOKEN)));
+    accessTokenApi = factory.openGitHubForToken(ps.getProperty(URL),
+            ps.getProperty(ACCESS_TOKEN));
 
     myPrCommit = ps.getProperty(PR_COMMIT);
   }
