@@ -88,10 +88,15 @@ public class ChangeStatusUpdater {
     final String repositoryOwner = feature.getParameters().get(C.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
+    final boolean useGuestUrls = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseGuestUrlsKey()));
     return new Handler() {
       @NotNull
       private String getViewResultsUrl(@NotNull final SRunningBuild build) {
-        return myWeb.getViewResultsUrl(build);
+        final String url = myWeb.getViewResultsUrl(build);
+        if (useGuestUrls) {
+          return url + (url.contains("?") ? "&" : "?") + "guest=1";
+        }
+        return url;
       }
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
