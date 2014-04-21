@@ -93,7 +93,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         final Collection<InvalidProperty> result = new ArrayList<InvalidProperty>();
         if (p == null) return result;
 
-        GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.valueOf(p.get(c.getAuthenticationTypeKey()));
+        GitHubApiAuthenticationType authenticationType = GitHubApiAuthenticationType.parse(p.get(c.getAuthenticationTypeKey()));
         if (authenticationType == GitHubApiAuthenticationType.PASSWORD_AUTH) {
           checkNotEmpty(p, c.getUserNameKey(), "Username must be specified", result);
           checkNotEmpty(p, c.getPasswordKey(), "Password must be specified", result);
