@@ -80,6 +80,10 @@
           <span class="error" id="error_${keys.accessTokenKey}"></span>
           <span class="smallNote">
             Specify a GitHub <a href="https://github.com/settings/applications" target="_blank">Personal Access Token</a>
+            <br />
+            It is required to have the following permissions:
+            <strong><em>repo:status</em></strong> and
+            <strong><em>public_repo</em></strong> or <strong><em>repo</em></strong> depending on the repository type
           </span>
         </td>
       </tr>
