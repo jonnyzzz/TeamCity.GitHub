@@ -19,6 +19,7 @@ import jetbrains.buildServer.BaseTestCase;
 import jetbrains.buildServer.util.PropertiesUtil;
 import jetbrains.buildServer.util.StringUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
+import jetbrains.teamcilty.github.api.GitHubApiFactory;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.*;
 import org.apache.http.auth.AuthenticationException;
@@ -61,15 +62,13 @@ public class GitHubApiTest extends BaseTestCase {
     myRepoName = ps.getProperty(REPOSITORY);
     myRepoOwner = ps.getProperty(OWNER, user);
 
-    myApi = new GitHubApiImpl(
-            new HttpClientWrapperImpl(),
-            new GitHubApiPaths(ps.getProperty(URL)),
+    final GitHubApiFactory factory = new GitHubApiFactoryImpl(new HttpClientWrapperImpl());
+
+    myApi = factory.openGitHub(ps.getProperty(URL),
             new GitHubApiPasswordAuthentication(user, rewind(ps.getProperty(PASSWORD_REV)))
     );
 
-    accessTokenApi = new GitHubApiImpl(
-            new HttpClientWrapperImpl(),
-            new GitHubApiPaths(ps.getProperty(URL)),
+    accessTokenApi = factory.openGitHub(ps.getProperty(URL),
             new GitHubApiTokenAuthentication(ps.getProperty(ACCESS_TOKEN)));
 
     myPrCommit = ps.getProperty(PR_COMMIT);

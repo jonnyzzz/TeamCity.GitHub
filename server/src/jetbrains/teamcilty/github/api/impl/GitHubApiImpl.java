@@ -20,7 +20,6 @@ import com.google.gson.Gson;
 import com.intellij.openapi.diagnostic.Logger;
 import jetbrains.buildServer.util.FileUtil;
 import jetbrains.teamcilty.github.api.GitHubApi;
-import jetbrains.teamcilty.github.api.GitHubApiAuthentication;
 import jetbrains.teamcilty.github.api.GitHubChangeState;
 import jetbrains.teamcilty.github.api.impl.data.*;
 import jetbrains.teamcilty.github.util.LoggerHelper;
@@ -29,11 +28,9 @@ import org.apache.http.HttpHeaders;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.jetbrains.annotations.NotNull;
@@ -55,22 +52,19 @@ import java.util.regex.Pattern;
  * @author Tomaz Cerar
  *         Date: 05.09.12 23:39
  */
-public class GitHubApiImpl implements GitHubApi {
+public abstract class GitHubApiImpl implements GitHubApi {
   private static final Logger LOG = LoggerHelper.getInstance(GitHubApiImpl.class);
   private static final Pattern PULL_REQUEST_BRANCH = Pattern.compile("/?refs/pull/(\\d+)/(.*)");
-  @NotNull
+
   private final HttpClientWrapper myClient;
-  private final Gson myGson = new Gson();
   private final GitHubApiPaths myUrls;
-  private GitHubApiAuthentication myGitHubApiAuthentication;
+  private final Gson myGson = new Gson();
 
   public GitHubApiImpl(@NotNull final HttpClientWrapper client,
-                       @NotNull final GitHubApiPaths urls,
-                       @NotNull final GitHubApiAuthentication gitHubApiAuthentication
+                       @NotNull final GitHubApiPaths urls
   ) {
     myClient = client;
     myUrls = urls;
-    myGitHubApiAuthentication = gitHubApiAuthentication;
   }
 
   @Nullable
@@ -223,11 +217,14 @@ public class GitHubApiImpl implements GitHubApi {
 
   private void includeAuthentication(@NotNull HttpRequest request) throws IOException {
     try {
-      request.addHeader(new BasicScheme().authenticate(myGitHubApiAuthentication.buildCredentials(), request));
+      setAuthentication(request);
     } catch (AuthenticationException e) {
       throw new IOException("Failed to set authentication for request. " + e.getMessage(), e);
     }
   }
+
+  protected abstract void setAuthentication(@NotNull final HttpRequest request) throws AuthenticationException;
+
 
   private void logFailedResponse(@NotNull HttpUriRequest request,
                                  @Nullable String requestEntity,

@@ -19,6 +19,9 @@ package jetbrains.teamcilty.github.api.impl;
 import jetbrains.teamcilty.github.api.GitHubApi;
 import jetbrains.teamcilty.github.api.GitHubApiAuthentication;
 import jetbrains.teamcilty.github.api.GitHubApiFactory;
+import org.apache.http.HttpRequest;
+import org.apache.http.auth.AuthenticationException;
+import org.apache.http.impl.auth.BasicScheme;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -33,7 +36,12 @@ public class GitHubApiFactoryImpl implements GitHubApiFactory {
   }
 
   @NotNull
-  public GitHubApi openGitHub(@NotNull String url, @NotNull GitHubApiAuthentication gitHubApiAuthentication) {
-    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url), gitHubApiAuthentication);
+  public GitHubApi openGitHub(@NotNull final String url, @NotNull final GitHubApiAuthentication gitHubApiAuthentication) {
+    return new GitHubApiImpl(myWrapper, new GitHubApiPaths(url)){
+      @Override
+      protected void setAuthentication(@NotNull HttpRequest request) throws AuthenticationException {
+        request.addHeader(new BasicScheme().authenticate(gitHubApiAuthentication.buildCredentials(), request));
+      }
+    };
   }
 }
