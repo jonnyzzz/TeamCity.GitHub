@@ -33,6 +33,18 @@ Letst build of the plugin could be downloaded from [TeamCity's build artifact](h
 
 **NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`)
 
+Internal Properties
+===================
+This is the list of [TeamCity Internal Properites](http://confluence.jetbrains.com/display/TCD8/Configuring+TeamCity+Server+Startup+Properties#ConfiguringTeamCityServerStartupProperties-TeamCityinternalproperties) that are supported by the plugin
+
+``teamcity.github.verify.ssl.certificate=true|false`` enable/disable https certificates check. default is false
+
+``teamcity.github.http.timeout`` GitHub connection timeout in milliseconds, default 5 minutes
+
+Properties to configure Proxy server settings used for GitHub conncetions.
+``teamcity.github.http.proxy.host``, ``teamcity.github.http.proxy.port`` defines proxy host/port 
+``teamcity.github.http.proxy.user``, ``teamcity.github.http.proxy.password`` optionally defines proxy credentials
+``teamcity.github.http.proxy.domain``, ``teamcity.github.http.proxy.workstation`` optionally deifnes NT doamin credentials
 
 License
 =======
