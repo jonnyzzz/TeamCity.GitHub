@@ -99,19 +99,19 @@ public class HttpClientWrapperImpl implements HttpClientWrapper {
   }
 
   private void setupProxy(DefaultHttpClient httpclient) {
-    final String httpProxy = TeamCityProperties.getProperty("teamcity.http.proxy.host.github");
+    final String httpProxy = TeamCityProperties.getProperty("teamcity.github.http.proxy.host");
     if (StringUtil.isEmptyOrSpaces(httpProxy)) return;
 
-    final int httpProxyPort = TeamCityProperties.getInteger("teamcity.http.proxy.port.github", -1);
+    final int httpProxyPort = TeamCityProperties.getInteger("teamcity.github.http.proxy.port", -1);
     if (httpProxyPort <= 0) return;
 
     LOG.info("TeamCity.GitHub will use proxy: " + httpProxy + ", port " + httpProxyPort);
     httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, new HttpHost(httpProxy, httpProxyPort));
 
-    final String httpProxyUser = TeamCityProperties.getProperty("teamcity.http.proxy.user.github");
-    final String httpProxyPassword = TeamCityProperties.getProperty("teamcity.http.proxy.password.github");
-    final String httpProxyDomain = TeamCityProperties.getProperty("teamcity.http.proxy.domain.github");
-    final String httpProxyWorkstation = TeamCityProperties.getProperty("teamcity.http.proxy.workstation.github");
+    final String httpProxyUser = TeamCityProperties.getProperty("teamcity.github.http.proxy.user");
+    final String httpProxyPassword = TeamCityProperties.getProperty("teamcity.github.http.proxy.password");
+    final String httpProxyDomain = TeamCityProperties.getProperty("teamcity.github.http.proxy.domain");
+    final String httpProxyWorkstation = TeamCityProperties.getProperty("teamcity.github.http.proxy.workstation");
 
     if (StringUtil.isEmptyOrSpaces(httpProxyUser) || StringUtil.isEmptyOrSpaces(httpProxyPassword)) return;
 
