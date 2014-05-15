@@ -38,7 +38,6 @@ Internal Properties
 This is the list of [TeamCity Internal Properites](http://confluence.jetbrains.com/display/TCD8/Configuring+TeamCity+Server+Startup+Properties#ConfiguringTeamCityServerStartupProperties-TeamCityinternalproperties) that are supported by the plugin
 
 ``teamcity.github.verify.ssl.certificate=true|false`` enable/disable https certificates check. default is false
-
 ``teamcity.github.http.timeout`` GitHub connection timeout in milliseconds, default 5 minutes
 
 Properties to configure Proxy server settings used for GitHub conncetions.
