@@ -2,9 +2,18 @@ TeamCity.GitHub
 ===============
 Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
 
+About the Plugin
+================
+The purpose of creating this plugin is to support integration with the [GitHub Change Status API](https://github.com/blog/1227-commit-status-api) in TeamCity, which allows TeamCity to automatically attach build statuses to GitHub pull requests.
+
+The plugin is described in more detail in the following blog posts:
+- http://blog.jonnyzzz.name/2012/09/reporting-change-status-to-github.html
+- http://blog.jonnyzzz.name/2012/09/github-status-api-in-teamcity-update.html
+- http://blog.jonnyzzz.name/2013/04/github-change-status-on-branches.html
+
+
 Installation and Configuration
 ==============================
-
 First, download the [latest build of the plugin](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/lastest.lastSuccessful/teamcity.github.zip), which is configured for continuous integration on TeamCity [here](http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv).
 
 **NOTE** Ensure that your download of the `.zip` file is valid - you may be redirected to the login page when using `curl` or `wget`.
@@ -28,15 +37,6 @@ It is highly recommended to use builds from the `master` branch.
 
 Try the build from `master` first. If you see problems, please report them as issues first. 
 If an urgent fix is required, then try a build from the `stable` branch.
-
-What is supported
-=================
-The aim to create the plugin was to support [GitHub Change Status API](https://github.com/blog/1227-commit-status-api) in TeamCity.
-
-The plugin is described in the following blog posts:
-- http://blog.jonnyzzz.name/2012/09/reporting-change-status-to-github.html
-- http://blog.jonnyzzz.name/2012/09/github-status-api-in-teamcity-update.html
-- http://blog.jonnyzzz.name/2013/04/github-change-status-on-branches.html
 
 Internal Properties
 ===================
