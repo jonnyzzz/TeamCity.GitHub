@@ -17,7 +17,7 @@ To use the plugin with one of your TeamCity projects, ensure that your VCS root 
 
 `+:refs/pull/(*/merge)`
 
-Then, add a new Build Feature to your project's configuration. You should see "Report change status to GitHub" in the list. Fill in the necessary info in the dialog, and you should be good to go!
+Finally, add a new Build Feature to your project's configuration. Choose "Report change status to GitHub" from the list, fill in the necessary info in the dialog, and you should be good to go!
 
 Branches
 ========
