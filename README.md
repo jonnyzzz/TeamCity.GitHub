@@ -24,7 +24,13 @@ After restarting the server, the plugin should show up as an external plugin in 
 
 To use the plugin with one of your TeamCity projects, ensure that your VCS root branch specification includes pull requests:
 
-`+:refs/pull/(*/merge)`
+`+:refs/pull/(*/head)` (build number will include `/head`)
+
+or 
+
+`+:refs/pull/(*)/head` (build number will not include `/head`)
+
+**Note:** It is also possible to use `+:refs/pull/(*/merge)`, but not recommended. There is some risk that this spec will cause a feedback loop of builds that will bog down your TeamCity server. [See this bug report](http://youtrack.jetbrains.com/issue/TW-33455) for more information.
 
 Finally, add a new Build Feature to your project's configuration. Choose "Report change status to GitHub" from the list, fill in the necessary info in the dialog, and you should be good to go!
 
