@@ -2,40 +2,52 @@ TeamCity.GitHub
 ===============
 Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
 
-Branches
-========
-We maintain two branches `master` and `stable`. Development is done in `master`. 
-Plugin from `stable` branch is expected to be more stable and feature-lacking
+About the Plugin
+================
+The purpose of creating this plugin is to support integration with the [GitHub Change Status API](https://github.com/blog/1227-commit-status-api) in TeamCity, which allows TeamCity to automatically attach build statuses to GitHub pull requests.
 
-It is highly recommended to use builds from `master` branch
-
-Try the build from `master` first. 
-If you see problems, please report them as issues first. 
-If urget fix is required, than try a build from `stable` branch
-
-What is supported
-=================
-The aim to create the plugin was to support GitHub Change Status API in TeamCity.
-https://github.com/blog/1227-commit-status-api
-
-Plugin is descibed in one of the following blog posts
+The plugin is described in more detail in the following blog posts:
 - http://blog.jonnyzzz.name/2012/09/reporting-change-status-to-github.html
 - http://blog.jonnyzzz.name/2012/09/github-status-api-in-teamcity-update.html
 - http://blog.jonnyzzz.name/2013/04/github-change-status-on-branches.html
 
-Download
+
+Installation and Configuration
+==============================
+First, download the [latest build of the plugin](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/lastest.lastSuccessful/teamcity.github.zip), which is configured for continuous integration on TeamCity [here](http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv).
+
+**NOTE** Ensure that your download of the `.zip` file is valid - you may be redirected to the login page when using `curl` or `wget`.
+
+Next, put the downloaded `.zip` file into the `<TeamCity Data Directory>/plugins` folder and restart the TeamCity server. You can also upload the .zip directly by clicking "Upload plugin zip" in the Plugins List section of the Administration settings in TeamCity's web interface.
+
+After restarting the server, the plugin should show up as an external plugin in the Plugins List section of the Administration settings.
+
+To use the plugin with one of your TeamCity projects, ensure that your VCS root branch specification includes pull requests:
+
+`+:refs/pull/(*/head)` (build number will include `/head`)
+
+or 
+
+`+:refs/pull/(*)/head` (build number will not include `/head`)
+
+**Note:** It is also possible to use `+:refs/pull/(*/merge)`, but not recommended. There is some risk that this spec will cause a feedback loop of builds that will bog down your TeamCity server. [See this bug report](http://youtrack.jetbrains.com/issue/TW-33455) for more information.
+
+Finally, add a new Build Feature to your project's configuration. Choose "Report change status to GitHub" from the list, fill in the necessary info in the dialog, and you should be good to go!
+
+Branches
 ========
-I set up TeamCity build configuration for it [here](http://teamcity.jetbrains.com/viewType.html?buildTypeId=bt398&tab=buildTypeStatusDiv)
+We maintain two branches, `master` and `stable`. Development is done in `master`. 
+The plugin from the `stable` branch is expected to be more stable and feature-lacking.
 
-To install plugin, put downloaded ```.zip``` file into `<TeamCity Data Directory>/plugins` folder and restart the server
+It is highly recommended to use builds from the `master` branch.
 
-Letst build of the plugin could be downloaded from [TeamCity's build artifact](http://teamcity.jetbrains.com/guestAuth/repository/download/bt398/lastest.lastSuccessful/teamcity.github.zip)
-
-**NOTE** Check you downloaded ```.zip``` file (you may be redirected to login page when using `curl` or `wget`)
+Try the build from `master` first. If you see problems, please report them as issues first. 
+If an urgent fix is required, then try a build from the `stable` branch.
 
 Internal Properties
 ===================
-This is the list of [TeamCity Internal Properites](http://confluence.jetbrains.com/display/TCD8/Configuring+TeamCity+Server+Startup+Properties#ConfiguringTeamCityServerStartupProperties-TeamCityinternalproperties) that are supported by the plugin
+
+This is the list of [TeamCity Internal Properites](http://confluence.jetbrains.com/display/TCD8/Configuring+TeamCity+Server+Startup+Properties#ConfiguringTeamCityServerStartupProperties-TeamCityinternalproperties) that are supported by the plugin.
 
 ``teamcity.github.verify.ssl.certificate=true|false`` enable/disable https certificates check. default is false
 ``teamcity.github.http.timeout`` GitHub connection timeout in milliseconds, default 5 minutes
@@ -53,7 +65,6 @@ Current Status
 ==============
 Implemented most-simpliest approach to update change status to github. 
 Only username/password authentication is supported.
-
 
 Note
 ====
