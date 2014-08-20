@@ -136,7 +136,8 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status"
+            "test status",
+            "Default"
     );
   }
 
@@ -147,7 +148,8 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status" + StringUtil.repeat("test", " ", 1000)
+            "test status" + StringUtil.repeat("test", " ", 1000),
+            "Default"
     );
   }
 
@@ -177,7 +179,8 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, "wrong_hash",
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status"
+            "test status",
+            "Default"
     );
   }
 
