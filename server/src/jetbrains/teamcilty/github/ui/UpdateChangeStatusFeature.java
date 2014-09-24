@@ -122,8 +122,11 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   @Override
   public Map<String, String> getDefaultParameters() {
     final Map<String, String> map = new HashMap<String, String>();
-    map.put(new UpdateChangesConstants().getServerKey(), GitHubApiFactory.DEFAULT_URL);
-    map.put(new UpdateChangesConstants().getContextKey(), "continuous-integration/teamcity");
+    final UpdateChangesConstants C = new UpdateChangesConstants();
+    map.put(C.getServerKey(), GitHubApiFactory.DEFAULT_URL);
+    map.put(C.getContextKey(), "continuous-integration/teamcity");
+    map.put(C.getReportOnStart(), "true");
+    map.put(C.getReportOnFinish(), "true");
     return map;
   }
 

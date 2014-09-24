@@ -90,6 +90,8 @@ public class ChangeStatusUpdater {
     @Nullable final String context = feature.getParameters().get(C.getContextKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
     final boolean useGuestUrls = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseGuestUrlsKey()));
+    final boolean shouldReportOnStart = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getReportOnStart()));
+    final boolean shouldReportOnFinish = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getReportOnFinish()));
 
     return new Handler() {
       @NotNull
@@ -99,6 +101,14 @@ public class ChangeStatusUpdater {
           return url + (url.contains("?") ? "&" : "?") + "guest=1";
         }
         return url;
+      }
+
+      public boolean shouldReportOnStart() {
+        return shouldReportOnStart;
+      }
+
+      public boolean shouldReportOnFinish() {
+        return shouldReportOnFinish;
       }
 
       public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
@@ -268,8 +278,9 @@ public class ChangeStatusUpdater {
   }
 
   public static interface Handler {
+    boolean shouldReportOnStart();
+    boolean shouldReportOnFinish();
     void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
-
     void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 }

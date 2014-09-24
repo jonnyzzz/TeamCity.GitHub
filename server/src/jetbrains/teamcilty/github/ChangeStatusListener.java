@@ -67,6 +67,8 @@ public class ChangeStatusListener {
       if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) continue;
 
       final Handler h = myUpdater.getUpdateHandler(feature);
+      if (isStarting && !h.shouldReportOnStart()) continue;
+      if (!isStarting && !h.shouldReportOnFinish()) continue;
 
       final Collection<BuildRevision> changes = getLatestChangesHash(build);
       if (changes.isEmpty()) {

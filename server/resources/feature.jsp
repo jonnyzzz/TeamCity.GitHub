@@ -37,6 +37,21 @@
     </td>
   </tr>
 
+  <tr>
+    <th><label for="${keys.reportOnStart}">Report on start:</label></th>
+    <td>
+      <props:checkboxProperty name="${keys.reportOnStart}"/>
+      <label for="${keys.reportOnStart}">Set pending status on build start</label>
+    </td>
+  </tr>
+
+  <tr>
+    <th><label for="${keys.reportOnFinish}">Report on finish:</label></th>
+    <td>
+      <props:checkboxProperty name="${keys.reportOnFinish}"/>
+      <label for="${keys.reportOnFinish}">Set success/fail status on build finish</label>
+    </td>
+  </tr>
 
   <tr>
     <th><label for="${keys.useCommentsKey}">Use comments:</label></th>
