@@ -87,8 +87,10 @@ public class ChangeStatusUpdater {
 
     final String repositoryOwner = feature.getParameters().get(C.getRepositoryOwnerKey());
     final String repositoryName = feature.getParameters().get(C.getRepositoryNameKey());
+    @Nullable final String context = feature.getParameters().get(C.getContextKey());
     final boolean addComments = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseCommentsKey()));
     final boolean useGuestUrls = !StringUtil.isEmptyOrSpaces(feature.getParameters().get(C.getUseGuestUrlsKey()));
+
     return new Handler() {
       @NotNull
       private String getViewResultsUrl(@NotNull final SRunningBuild build) {
@@ -239,7 +241,8 @@ public class ChangeStatusUpdater {
                       hash,
                       status,
                       getViewResultsUrl(build),
-                      message
+                      message,
+                      context
               );
               LOG.info("Updated GitHub status for hash: " + hash + ", buildId: " + build.getBuildId() + ", status: " + status);
             } catch (IOException e) {

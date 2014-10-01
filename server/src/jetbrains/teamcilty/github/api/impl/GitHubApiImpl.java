@@ -115,8 +115,9 @@ public abstract class GitHubApiImpl implements GitHubApi {
                               @NotNull final String hash,
                               @NotNull final GitHubChangeState status,
                               @NotNull final String targetUrl,
-                              @NotNull final String description) throws IOException {
-    final GSonEntity requestEntity = new GSonEntity(myGson, new CommitStatus(status.getState(), targetUrl, description));
+                              @NotNull final String description,
+                              @Nullable final String context) throws IOException {
+    final GSonEntity requestEntity = new GSonEntity(myGson, new CommitStatus(status.getState(), targetUrl, description, context));
     final HttpPost post = new HttpPost(myUrls.getStatusUrl(repoOwner, repoName, hash));
     try {
       post.setEntity(requestEntity);

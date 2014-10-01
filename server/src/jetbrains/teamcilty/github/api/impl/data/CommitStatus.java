@@ -27,11 +27,13 @@ public class CommitStatus {
   @Nullable public String state;
   @Nullable public String target_url;
   @Nullable public String description;
+  @Nullable public String context;
 
-  public CommitStatus(@Nullable String state, @Nullable String target_url, @Nullable String description) {
+  public CommitStatus(@Nullable String state, @Nullable String target_url, @Nullable String description, @Nullable String context) {
     this.state = state;
     this.target_url = target_url;
     this.description = truncateStringValueWithDotsAtEnd(description, 140);
+    this.context = context;
   }
 
   @Nullable

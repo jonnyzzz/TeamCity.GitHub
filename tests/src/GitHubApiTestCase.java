@@ -136,7 +136,8 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status"
+            "test status",
+            null
     );
   }
 
@@ -147,7 +148,32 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status" + StringUtil.repeat("test", " ", 1000)
+            "test status" + StringUtil.repeat("test", " ", 1000),
+            null
+    );
+  }
+
+  @Test
+  public void test_set_status_context() throws IOException, AuthenticationException {
+    String hash = getApi().findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status",
+            "Default_TC"
+    );
+  }
+
+  @Test
+  public void test_set_longer_status_context() throws IOException, AuthenticationException {
+    String hash = getApi().findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status" + StringUtil.repeat("test", " ", 1000),
+            "Default_TC"
     );
   }
 
@@ -177,7 +203,8 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
     getApi().setChangeStatus(myRepoOwner, myRepoName, "wrong_hash",
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
-            "test status"
+            "test status",
+            "Default"
     );
   }
 
