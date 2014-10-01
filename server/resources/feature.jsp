@@ -67,9 +67,9 @@
     <td>
       <props:textProperty name="${keys.contextKey}" className="longField"/>
       <span class="error" id="error_${keys.contextKey}"></span>
-    <span class="smallNote">
-      Specify a string to differentiate this status from others.
-    </span>
+      <span class="smallNote">
+        Specify a string to differentiate this status from others.
+      </span>
     </td>
   </tr>
 
