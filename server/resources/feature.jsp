@@ -68,7 +68,7 @@
       <props:textProperty name="${keys.contextKey}" className="longField"/>
       <span class="error" id="error_${keys.contextKey}"></span>
       <span class="smallNote">
-        Specify a string to differentiate this status from others.
+        Specify GitHub status context. Leave blank for 'default'
       </span>
     </td>
   </tr>
