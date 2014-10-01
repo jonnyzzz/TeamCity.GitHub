@@ -123,6 +123,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
   public Map<String, String> getDefaultParameters() {
     final Map<String, String> map = new HashMap<String, String>();
     map.put(new UpdateChangesConstants().getServerKey(), GitHubApiFactory.DEFAULT_URL);
+    map.put(new UpdateChangesConstants().getContextKey(), "continuous-integration/teamcity");
     return map;
   }
 
