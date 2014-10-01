@@ -37,7 +37,7 @@ public interface GitHubApi {
                        @NotNull GitHubChangeState status,
                        @NotNull String targetUrl,
                        @NotNull String description,
-                       @NotNull String context) throws IOException;
+                       @Nullable String context) throws IOException;
 
 
   /**
