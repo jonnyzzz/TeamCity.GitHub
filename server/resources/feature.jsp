@@ -63,7 +63,7 @@
   </tr>
 
   <tr>
-    <th>Context:<l:star/></th>
+    <th>Context:</th>
     <td>
       <props:textProperty name="${keys.contextKey}" className="longField"/>
       <span class="error" id="error_${keys.contextKey}"></span>
