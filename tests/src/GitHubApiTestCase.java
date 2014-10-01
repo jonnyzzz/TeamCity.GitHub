@@ -137,7 +137,7 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status",
-            "Default"
+            null
     );
   }
 
@@ -149,7 +149,31 @@ public abstract class GitHubApiTestCase extends BaseTestCase {
             GitHubChangeState.Pending,
             "http://teamcity.jetbrains.com",
             "test status" + StringUtil.repeat("test", " ", 1000),
-            "Default"
+            null
+    );
+  }
+
+  @Test
+  public void test_set_status_context() throws IOException, AuthenticationException {
+    String hash = getApi().findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status",
+            "Default_TC"
+    );
+  }
+
+  @Test
+  public void test_set_longer_status_context() throws IOException, AuthenticationException {
+    String hash = getApi().findPullRequestCommit(myRepoOwner, myRepoName, "refs/pull/1/merge");
+    assert hash != null;
+    getApi().setChangeStatus(myRepoOwner, myRepoName, hash,
+            GitHubChangeState.Pending,
+            "http://teamcity.jetbrains.com",
+            "test status" + StringUtil.repeat("test", " ", 1000),
+            "Default_TC"
     );
   }
 
