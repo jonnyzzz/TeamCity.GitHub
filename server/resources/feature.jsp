@@ -37,21 +37,14 @@
     </td>
   </tr>
 
-  <tr>
-    <th><label for="${keys.reportOnStart}">Report on start:</label></th>
-    <td>
-      <props:checkboxProperty name="${keys.reportOnStart}"/>
-      <label for="${keys.reportOnStart}">Set pending status on build start</label>
-    </td>
-  </tr>
-
-  <tr>
-    <th><label for="${keys.reportOnFinish}">Report on finish:</label></th>
-    <td>
-      <props:checkboxProperty name="${keys.reportOnFinish}"/>
-      <label for="${keys.reportOnFinish}">Set success/fail status on build finish</label>
-    </td>
-  </tr>
+  <props:selectSectionProperty name="${keys.reportOnKey}" title="Report:">
+    <props:selectSectionPropertyContent value="${keys.reportOnStartAndFinishValue}" caption="On Start and Finish">
+    </props:selectSectionPropertyContent>
+    <props:selectSectionPropertyContent value="${keys.reportOnStartValue}" caption="On Start">
+    </props:selectSectionPropertyContent>
+    <props:selectSectionPropertyContent value="${keys.reportOnFinishValue}" caption="On Finish">
+    </props:selectSectionPropertyContent>
+  </props:selectSectionProperty>
 
   <tr>
     <th><label for="${keys.useCommentsKey}">Use comments:</label></th>

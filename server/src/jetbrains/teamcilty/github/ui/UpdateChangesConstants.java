@@ -18,6 +18,7 @@ package jetbrains.teamcilty.github.ui;
 
 import jetbrains.buildServer.agent.Constants;
 import jetbrains.teamcilty.github.api.GitHubApiAuthenticationType;
+import jetbrains.teamcilty.github.api.GitHubApiReportEvent;
 
 /**
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
@@ -30,8 +31,10 @@ public class UpdateChangesConstants {
   public String getRepositoryNameKey() { return "guthub_repo"; }
   public String getRepositoryOwnerKey() { return "guthub_owner"; }
   public String getContextKey() { return "guthub_context"; }
-  public String getReportOnStart() { return "github_report_on_start"; }
-  public String getReportOnFinish() { return "github_report_on_finish"; }
+  public String getReportOnKey() { return "github_report_on"; }
+  public String getReportOnStartAndFinishValue() { return GitHubApiReportEvent.ON_START_AND_FINISH.getValue(); }
+  public String getReportOnStartValue() { return GitHubApiReportEvent.ON_START.getValue(); }
+  public String getReportOnFinishValue() { return GitHubApiReportEvent.ON_FINISH.getValue(); }
   public String getUseCommentsKey() { return "guthub_comments"; }
   public String getUseGuestUrlsKey() { return "guthub_guest"; }
   public String getAccessTokenKey() { return Constants.SECURE_PROPERTY_PREFIX +"github_access_token"; }

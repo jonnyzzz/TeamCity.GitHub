@@ -125,8 +125,6 @@ public class UpdateChangeStatusFeature extends BuildFeature {
     final UpdateChangesConstants C = new UpdateChangesConstants();
     map.put(C.getServerKey(), GitHubApiFactory.DEFAULT_URL);
     map.put(C.getContextKey(), "continuous-integration/teamcity");
-    map.put(C.getReportOnStart(), "true");
-    map.put(C.getReportOnFinish(), "true");
     return map;
   }
 
