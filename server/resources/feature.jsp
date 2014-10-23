@@ -37,12 +37,14 @@
     </td>
   </tr>
 
-  <props:selectSectionProperty name="${keys.reportOnKey}" title="Report:">
-    <props:selectSectionPropertyContent value="${keys.reportOnStartAndFinishValue}" caption="On Start and Finish">
+  <props:selectSectionProperty name="${keys.reportOnKey}" title="Report status on:">
+    <props:selectSectionPropertyContent value="${keys.reportOnStartAndFinishValue}" caption="Build start and finish">
     </props:selectSectionPropertyContent>
-    <props:selectSectionPropertyContent value="${keys.reportOnStartValue}" caption="On Start">
+
+    <props:selectSectionPropertyContent value="${keys.reportOnStartValue}" caption="Build start only">
     </props:selectSectionPropertyContent>
-    <props:selectSectionPropertyContent value="${keys.reportOnFinishValue}" caption="On Finish">
+
+    <props:selectSectionPropertyContent value="${keys.reportOnFinishValue}" caption="Build finish only">
     </props:selectSectionPropertyContent>
   </props:selectSectionProperty>
 
