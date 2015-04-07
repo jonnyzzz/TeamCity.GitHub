@@ -118,7 +118,18 @@ public class ChangeStatusUpdater {
       }
 
       public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
-        GitHubChangeState status = build.getStatusDescriptor().isSuccessful() ? GitHubChangeState.Success : GitHubChangeState.Error;
+
+        switch (build.getStatusDescriptor().getStatus()) {
+          case Status.NORMAL:
+            GitHubChangeState status = GitHubChangeState.Success;
+            break;
+          case Status.FAILURE:
+            GitHubChangeState status = GitHubChangeState.Failure;
+            break;
+          default:
+            GitHubChangeState status = GitHubChangeState.Error;
+        }
+
         String text = build.getStatusDescriptor().getText();
         if (text != null) {
           text = ": " + text;
