@@ -120,9 +120,11 @@ public class ChangeStatusUpdater {
       public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
 
         GitHubChangeState status;
-        if(build.getStatusDescriptor().equals(Status.NORMAL)){
+        LOG.debug("Status :" + build.getStatusDescriptor().getStatus().getText());
+        LOG.debug("Status Priority:" + build.getStatusDescriptor().getStatus().getPriority());
+        if(build.getStatusDescriptor().getStatus().getPriority() == Status.NORMAL.getPriority()){
           status = GitHubChangeState.Success;
-        }else if(build.getStatusDescriptor().equals(Status.FAILURE)) {
+        }else if(build.getStatusDescriptor().getStatus().getPriority() == Status.FAILURE.getPriority()) {
           status = GitHubChangeState.Failure;
         }else{
           status = GitHubChangeState.Error;
