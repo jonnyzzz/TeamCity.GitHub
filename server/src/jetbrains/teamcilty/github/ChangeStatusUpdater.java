@@ -118,25 +118,36 @@ public class ChangeStatusUpdater {
       }
 
       public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
-
-        GitHubChangeState status;
         LOG.debug("Status :" + build.getStatusDescriptor().getStatus().getText());
         LOG.debug("Status Priority:" + build.getStatusDescriptor().getStatus().getPriority());
-        if(build.getStatusDescriptor().getStatus().getPriority() == Status.NORMAL.getPriority()){
-          status = GitHubChangeState.Success;
-        }else if(build.getStatusDescriptor().getStatus().getPriority() == Status.FAILURE.getPriority()) {
-          status = GitHubChangeState.Failure;
-        }else{
-          status = GitHubChangeState.Error;
-        }
 
-        String text = build.getStatusDescriptor().getText();
-        if (text != null) {
-          text = ": " + text;
-        } else {
-          text = "";
-        }
+        final GitHubChangeState status = getGitHubChangeState(build);
+        final String text = getGitHubChangeText(build);
         scheduleChangeUpdate(version, build, "Finished TeamCity Build " + build.getFullName() + " " + text, status);
+      }
+
+      @NotNull
+      private String getGitHubChangeText(@NotNull final SRunningBuild build) {
+        final String text = build.getStatusDescriptor().getText();
+        if (text != null) {
+          return ": " + text;
+        } else {
+          return "";
+        }
+      }
+
+      @NotNull
+      private GitHubChangeState getGitHubChangeState(@NotNull final SRunningBuild build) {
+        final Status status = build.getStatusDescriptor().getStatus();
+        final byte priority = status.getPriority();
+
+        if (priority == Status.NORMAL.getPriority()) {
+          return GitHubChangeState.Success;
+        } else if (priority == Status.FAILURE.getPriority()) {
+          return GitHubChangeState.Failure;
+        } else {
+          return GitHubChangeState.Error;
+        }
       }
 
       private void scheduleChangeUpdate(@NotNull final RepositoryVersion version,
