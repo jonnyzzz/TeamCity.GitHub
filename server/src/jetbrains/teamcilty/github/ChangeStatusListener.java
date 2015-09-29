@@ -62,6 +62,10 @@ public class ChangeStatusListener {
   private void updateBuildStatus(@NotNull final SRunningBuild build, boolean isStarting) {
     SBuildType bt = build.getBuildType();
     if (bt == null) return;
+    if (build.isPersonal()) {
+      LOG.debug("Skipping status update for personal build");
+      return;
+    }
 
     for (SBuildFeatureDescriptor feature : bt.getResolvedSettings().getBuildFeatures()) {
       if (!feature.getType().equals(UpdateChangeStatusFeature.FEATURE_TYPE)) continue;
