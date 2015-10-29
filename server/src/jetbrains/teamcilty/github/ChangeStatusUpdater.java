@@ -164,7 +164,7 @@ public class ChangeStatusUpdater {
           @NotNull
           private String getFailureText(@Nullable final STestRun testRun) {
             final String no_data = "<no details avaliable>";
-            if (failureInfo == null) return no_data;
+            if (testRun == null) return no_data;
 
             final String details = testRun.getFullText();
             if (details == null || StringUtil.isEmptyOrSpaces(details)) return no_data;
