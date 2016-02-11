@@ -87,7 +87,7 @@ public class UpdateChangeStatusFeature extends BuildFeature {
                               @NotNull final String key) {
         String value = StringUtil.isEmptyOrSpaces(properties.get(key));
         if (!value) {
-          key = key.replace("guthub", "github");
+          key = key.replace("github", "guthub");
           value = StringUtil.isEmptyOrSpaces(properties.get(key));
         }
         return value;
