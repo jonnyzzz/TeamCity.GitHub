@@ -2,6 +2,15 @@ TeamCity.GitHub
 ===============
 Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
 
+NOTE
+====
+Time goes by, world changes. TeamCity changes too.
+
+Some time ago, TeamCity released yet another support for 
+[status reporting](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher)
+
+This plugin providesANOTHER implementationof GitHub status publishing API
+
 About the Plugin
 ================
 The purpose of creating this plugin is to support integration with the [GitHub Change Status API](https://github.com/blog/1227-commit-status-api) in TeamCity, which allows TeamCity to automatically attach build statuses to GitHub pull requests.
