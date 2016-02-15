@@ -9,7 +9,7 @@ Time goes by, world changes. TeamCity changes too.
 Some time ago, TeamCity released yet another support for 
 [status reporting](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher)
 
-This plugin providesANOTHER implementationof GitHub status publishing API
+This plugin provides ANOTHER implementationof GitHub status publishing API
 
 About the Plugin
 ================
