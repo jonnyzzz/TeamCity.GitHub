@@ -117,7 +117,7 @@ public class ChangeStatusUpdater {
         scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
       }
 
-      public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
+      public void scheduleChangeCompleted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         LOG.debug("Status :" + build.getStatusDescriptor().getStatus().getText());
         LOG.debug("Status Priority:" + build.getStatusDescriptor().getStatus().getPriority());
 
@@ -305,6 +305,6 @@ public class ChangeStatusUpdater {
     boolean shouldReportOnStart();
     boolean shouldReportOnFinish();
     void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
-    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+    void scheduleChangeCompleted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 }

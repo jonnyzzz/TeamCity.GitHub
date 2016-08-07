@@ -83,7 +83,7 @@ public class ChangeStatusListener {
         if (isStarting) {
           h.scheduleChangeStarted(e.getRepositoryVersion(), build);
         } else {
-          h.scheduleChangeCompeted(e.getRepositoryVersion(), build);
+          h.scheduleChangeCompleted(e.getRepositoryVersion(), build);
         }
       }
     }
