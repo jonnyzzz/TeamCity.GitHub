@@ -163,7 +163,7 @@ public class ChangeStatusUpdater {
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
           @NotNull
           private String getFailureText(@Nullable final TestFailureInfo failureInfo) {
-            final String no_data = "<no details avaliable>";
+            final String no_data = "<no details available>";
             if (failureInfo == null) return no_data;
 
             final String stacktrace = failureInfo.getShortStacktrace();
