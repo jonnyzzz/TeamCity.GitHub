@@ -18,6 +18,7 @@
           </element>
         </element>
         <element id="library" level="project" name="commons-http" />
+        <element id="library" level="project" name="gson" />
       </element>
       <element id="file-copy" path="$PROJECT_DIR$/server/teamcity-server-plugin.xml" output-file-name="teamcity-plugin.xml" />
     </root>

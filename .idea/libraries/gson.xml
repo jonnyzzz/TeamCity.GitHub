@@ -1,9 +1,11 @@
 <component name="libraryTable">
   <library name="gson">
     <CLASSES>
-      <root url="jar://$TeamCityDistribution$/webapps/ROOT/WEB-INF/lib/gson-1.7.1.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/gson/gson-2.6.2.jar!/" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES />
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/gson/gson-2.6.2-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
