@@ -16,9 +16,9 @@ About the Plugin
 The purpose of creating this plugin is to support integration with the [GitHub Change Status API](https://github.com/blog/1227-commit-status-api) in TeamCity, which allows TeamCity to automatically attach build statuses to GitHub pull requests.
 
 The plugin is described in more detail in the following blog posts:
-- http://blog.jonnyzzz.name/2012/09/reporting-change-status-to-github.html
-- http://blog.jonnyzzz.name/2012/09/github-status-api-in-teamcity-update.html
-- http://blog.jonnyzzz.name/2013/04/github-change-status-on-branches.html
+- http://jonnyzzz.com/blog/2012/09/06/reporting-change-status-to-github
+- http://jonnyzzz.com/blog/2012/09/13/github-status-api-in-teamcity-update
+- http://jonnyzzz.com/blog/2013/04/26/github-change-status-on-branches
 
 
 Installation and Configuration
