@@ -106,10 +106,10 @@ public class UpdateChangeStatusFeature extends BuildFeature {
         checkNotEmpty(p, c.getRepositoryNameKey(), "Repository name must be specified", result);
         checkNotEmpty(p, c.getRepositoryOwnerKey(), "Repository owner must be specified", result);
 
-        if (!checkNotEmpty(p, c.getServerKey(), "GitHub api URL", result)) {
+        if (!checkNotEmpty(p, c.getServerKey(), "GitHub API URL", result)) {
           final String url = "" + p.get(c.getServerKey());
           if (!ReferencesResolverUtil.mayContainReference(url) && !(url.startsWith("http://") || url.startsWith("https://"))) {
-            result.add(new InvalidProperty(c.getServerKey(), "GitHub api URL should start with http:// or https://"));
+            result.add(new InvalidProperty(c.getServerKey(), "GitHub API URL should start with http:// or https://"));
           }
         }
 

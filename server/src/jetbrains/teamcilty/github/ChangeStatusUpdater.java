@@ -117,7 +117,7 @@ public class ChangeStatusUpdater {
         scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
       }
 
-      public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
+      public void scheduleChangeCompleted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         LOG.debug("Status :" + build.getStatusDescriptor().getStatus().getText());
         LOG.debug("Status Priority:" + build.getStatusDescriptor().getStatus().getPriority());
 
@@ -163,7 +163,7 @@ public class ChangeStatusUpdater {
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
           @NotNull
           private String getFailureText(@Nullable final TestFailureInfo failureInfo) {
-            final String no_data = "<no details avaliable>";
+            final String no_data = "<no details available>";
             if (failureInfo == null) return no_data;
 
             final String stacktrace = failureInfo.getShortStacktrace();
@@ -305,6 +305,6 @@ public class ChangeStatusUpdater {
     boolean shouldReportOnStart();
     boolean shouldReportOnFinish();
     void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
-    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+    void scheduleChangeCompleted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 }

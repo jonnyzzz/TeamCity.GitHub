@@ -71,7 +71,7 @@ public interface GitHubApi {
    * @param repoOwner repo owner
    * @param repoName repo name
    * @param hash commit hash
-   * @return colleciton of commit parents
+   * @return collection of commit parents
    * @throws IOException
    */
   @NotNull

@@ -8,7 +8,7 @@
 
   <bean class="jetbrains.teamcilty.github.ui.UpdateChangePathsImpl"/>
   <bean class="jetbrains.teamcilty.github.ui.UpdateChangeStatusFeature"/>
-  <bean class="jetbrains.teamcilty.github.ui.UpdateChanesStatusController"/>
+  <bean class="jetbrains.teamcilty.github.ui.UpdateChangesStatusController"/>
 
   <bean class="jetbrains.teamcilty.github.ChangeStatusListener"/>
   <bean class="jetbrains.teamcilty.github.ChangeStatusUpdater"/>

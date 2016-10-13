@@ -54,7 +54,7 @@ public class GitHubUsageStatisticsProvider implements UsageStatisticsProvider, U
   }
 
   public void accept(@NotNull UsageStatisticsPresentationManager presentationManager) {
-    presentationManager.applyPresentation(TEAMCITY_GITHUB, "Biuld configurations with GitHub status updater", null, null, null);
+    presentationManager.applyPresentation(TEAMCITY_GITHUB, "Build configurations with GitHub status updater", null, null, null);
   }
 }
 

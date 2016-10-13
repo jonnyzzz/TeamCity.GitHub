@@ -30,13 +30,13 @@ import javax.servlet.http.HttpServletResponse;
  * Created by Eugene Petrenko (eugene.petrenko@gmail.com)
  * Date: 05.09.12 22:44
  */
-public class UpdateChanesStatusController extends BaseController {
+public class UpdateChangesStatusController extends BaseController {
   @NotNull
   private final PluginDescriptor myDescriptor;
 
-  public UpdateChanesStatusController(@NotNull final PluginDescriptor descriptor,
-                                      @NotNull final UpdateChangePaths paths,
-                                      @NotNull final WebControllerManager web) {
+  public UpdateChangesStatusController(@NotNull final PluginDescriptor descriptor,
+                                       @NotNull final UpdateChangePaths paths,
+                                       @NotNull final WebControllerManager web) {
     myDescriptor = descriptor;
     web.registerController(paths.getControllerPath(), this);
   }
