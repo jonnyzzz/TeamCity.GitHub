@@ -42,9 +42,10 @@ public class ChangeStatusListener {
                               @NotNull final ChangeStatusUpdater updater) {
     myUpdater = updater;
     listener.addListener(new BuildServerAdapter(){
+
       @Override
-      public void changesLoaded(@NotNull final SRunningBuild build) {
-        updateBuildStatus(build, true);
+      public void buildTypeAddedToQueue(@NotNull SBuildType buildType) {
+        updateBuildStatus(buildType.getLastChangesStartedBuild(), true);
       }
 
       @Override
@@ -59,7 +60,7 @@ public class ChangeStatusListener {
     });
   }
 
-  private void updateBuildStatus(@NotNull final SRunningBuild build, boolean isStarting) {
+  private void updateBuildStatus(@NotNull final SBuild build, boolean isStarting) {
     SBuildType bt = build.getBuildType();
     if (bt == null) return;
     if (build.isPersonal()) {
@@ -90,7 +91,7 @@ public class ChangeStatusListener {
   }
 
   @NotNull
-  private Collection<BuildRevision> getLatestChangesHash(@NotNull final SRunningBuild build) {
+  private Collection<BuildRevision> getLatestChangesHash(@NotNull final SBuild build) {
     final Collection<BuildRevision> result = new ArrayList<BuildRevision>();
     for (BuildRevision rev : build.getRevisions()) {
       if (!"jetbrains.git".equals(rev.getRoot().getVcsName())) continue;
