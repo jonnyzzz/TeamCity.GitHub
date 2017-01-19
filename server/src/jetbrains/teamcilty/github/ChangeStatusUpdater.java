@@ -162,14 +162,14 @@ public class ChangeStatusUpdater {
 
         myExecutor.submit(ExceptionUtil.catchAll("set change status on github", new Runnable() {
           @NotNull
-          private String getFailureText(@Nullable final TestFailureInfo failureInfo) {
+          private String getFailureText(@Nullable final STestRun testRun) {
             final String no_data = "<no details avaliable>";
-            if (failureInfo == null) return no_data;
+            if (testRun == null) return no_data;
 
-            final String stacktrace = failureInfo.getShortStacktrace();
-            if (stacktrace == null || StringUtil.isEmptyOrSpaces(stacktrace)) return no_data;
+            final String details = testRun.getFullText();
+            if (details == null || StringUtil.isEmptyOrSpaces(details)) return no_data;
 
-            return stacktrace;
+            return details;
           }
 
           @NotNull
@@ -225,7 +225,7 @@ public class ChangeStatusUpdater {
                     comment.append("");
                     comment.append(testRun.getTest().getName().toString());
                     comment.append(": ");
-                    comment.append(getFailureText(testRun.getFailureInfo()));
+                    comment.append(getFailureText(testRun));
                     comment.append("\n\n");
 
                     if (i == 10) {
