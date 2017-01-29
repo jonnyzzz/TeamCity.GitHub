@@ -97,7 +97,7 @@ public class ChangeStatusUpdater {
 
     return new Handler() {
       @NotNull
-      private String getViewResultsUrl(@NotNull final SBuild build) {
+      private String getViewResultsUrl(@NotNull final SRunningBuild build) {
         final String url = myWeb.getViewResultsUrl(build);
         if (useGuestUrls) {
           return url + (url.contains("?") ? "&" : "?") + "guest=1";
@@ -113,11 +113,11 @@ public class ChangeStatusUpdater {
         return shouldReportOnFinish;
       }
 
-      public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SBuild build) {
+      public void scheduleChangeStarted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         scheduleChangeUpdate(version, build, "Started TeamCity Build " + build.getFullName(), GitHubChangeState.Pending);
       }
 
-      public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SBuild build) {
+      public void scheduleChangeCompeted(@NotNull RepositoryVersion version, @NotNull SRunningBuild build) {
         LOG.debug("Status :" + build.getStatusDescriptor().getStatus().getText());
         LOG.debug("Status Priority:" + build.getStatusDescriptor().getStatus().getPriority());
 
@@ -127,7 +127,7 @@ public class ChangeStatusUpdater {
       }
 
       @NotNull
-      private String getGitHubChangeText(@NotNull final SBuild build) {
+      private String getGitHubChangeText(@NotNull final SRunningBuild build) {
         final String text = build.getStatusDescriptor().getText();
         if (text != null) {
           return ": " + text;
@@ -137,7 +137,7 @@ public class ChangeStatusUpdater {
       }
 
       @NotNull
-      private GitHubChangeState getGitHubChangeState(@NotNull final SBuild build) {
+      private GitHubChangeState getGitHubChangeState(@NotNull final SRunningBuild build) {
         final Status status = build.getStatusDescriptor().getStatus();
         final byte priority = status.getPriority();
 
@@ -151,7 +151,7 @@ public class ChangeStatusUpdater {
       }
 
       private void scheduleChangeUpdate(@NotNull final RepositoryVersion version,
-                                        @NotNull final SBuild build,
+                                        @NotNull final SRunningBuild build,
                                         @NotNull final String message,
                                         @NotNull final GitHubChangeState status) {
         LOG.info("Scheduling GitHub status update for " +
@@ -183,7 +183,7 @@ public class ChangeStatusUpdater {
 
           @NotNull
           private String getComment(@NotNull RepositoryVersion version,
-                                    @NotNull SBuild build,
+                                    @NotNull SRunningBuild build,
                                     boolean completed,
                                     @NotNull String hash) {
             final StringBuilder comment = new StringBuilder();
@@ -304,7 +304,7 @@ public class ChangeStatusUpdater {
   public static interface Handler {
     boolean shouldReportOnStart();
     boolean shouldReportOnFinish();
-    void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SBuild build);
-    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SBuild build);
+    void scheduleChangeStarted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
+    void scheduleChangeCompeted(@NotNull final RepositoryVersion hash, @NotNull final SRunningBuild build);
   }
 }
