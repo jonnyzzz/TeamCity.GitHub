@@ -25,7 +25,7 @@
   <tr>
     <th>URL:<l:star/></th>
     <td>
-      <props:textProperty name="${keys.serverKey}" className="longField"/>
+      <props:textProperty name="${keys.serverKey}" className="longField" value="https://api.github.com/"/>
       <span class="error" id="error_${keys.serverKey}"></span>
     <span class="smallNote">
       Specify GitHub instance URL.
