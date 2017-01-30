@@ -85,7 +85,10 @@ public class UpdateChangeStatusFeature extends BuildFeature {
 
       private boolean isEmpty(@NotNull final Map<String, String> properties,
                               @NotNull final String key) {
-        return StringUtil.isEmptyOrSpaces(properties.get(key));
+        if (StringUtil.isEmptyOrSpaces(properties.get(key))) {
+          return StringUtil.isEmptyOrSpaces(properties.get(key.replace("github", "guthub")));
+        }
+        return false;
       }
 
       @NotNull
