@@ -1,15 +1,18 @@
-TeamCity.GitHub
+Supported in TeamCity
+====
+
+GitHub integration features are **inlcuded** in new [TeamCity](https://jetbrains.com/teamcity) versions. 
+You may find the [blog-post for 2018.2](https://blog.jetbrains.com/teamcity/2018/10/github-pull-requests-plugin-for-teamcity/)
+interesting. 
+See [status reporting](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher) for more info.
+
+
+This plugin provides **ANOTHER** implementation of GitHub status publishing API with another bugs and issues.
+
+TeamCity.GitHub (obsolete)
 ===============
 Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
 
-NOTE
-====
-Time goes by, world changes. TeamCity changes too.
-
-Some time ago, TeamCity released yet another support for 
-[status reporting](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher)
-
-This plugin provides ANOTHER implementationof GitHub status publishing API
 
 About the Plugin
 ================
