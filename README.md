@@ -1,17 +1,9 @@
-Supported in TeamCity
+TeamCity.GitHub (obsolete)
 ----
 
-GitHub integration features are **inlcuded** in new [TeamCity](https://jetbrains.com/teamcity) versions. 
-You may find the [blog-post for 2018.2](https://blog.jetbrains.com/teamcity/2018/10/github-pull-requests-plugin-for-teamcity/)
-interesting. 
-See [status reporting](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher) for more info.
+This plugin provides GitHub integration for [TeamCity](https://jetbrains.com/teamcity) 7.1 and later releases, automatically reporting the status of a TeamCity build to its corresponding GitHub repository.
 
-
-This plugin provides **ANOTHER** implementation of GitHub status publishing API with another bugs and issues.
-
-TeamCity.GitHub (obsolete)
-=====
-Integration of TeamCity and GitHub. Supports TeamCity 7.1 and newer
+Please note that TeamCity 10.0 and later releases now include built-in support for updating GitHub and other platforms through the bundled [Commit Status Publisher](https://www.jetbrains.com/help/teamcity/commit-status-publisher.html), which effectively replaces this TeamCity.GitHub project. No further work is being done on TeamCity.GitHub, and we recommend that users migrate to Commit Status Publisher. 
 
 
 About the Plugin
@@ -22,6 +14,10 @@ The plugin is described in more detail in the following blog posts:
 - http://jonnyzzz.com/blog/2012/09/06/reporting-change-status-to-github
 - http://jonnyzzz.com/blog/2012/09/13/github-status-api-in-teamcity-update
 - http://jonnyzzz.com/blog/2013/04/26/github-change-status-on-branches
+
+Other useful links: 
+- [GitHub Pull Requests plugin for TeamCity | TeamCity Blog](https://blog.jetbrains.com/teamcity/2018/10/github-pull-requests-plugin-for-teamcity/)
+- [Commit Status Publisher - TeamCity - Confluence](https://confluence.jetbrains.com/display/TW/Commit+Status+Publisher)
 
 
 Installation and Configuration
@@ -73,12 +69,11 @@ License
 =======
 Apache 2.0
 
-Current Status
+Current Status: Deprecated
 ==============
-Implemented most-simpliest approach to update change status to github. 
-Only username/password authentication is supported.
+TeamCity.GitHub implements a simple approach to updating change status to github. Only username/password authentication is supported.
+No further work is being done on TeamCity.GitHub, and users are advised to migrate to [Commit Status Publisher](https://www.jetbrains.com/help/teamcity/commit-status-publisher.html). 
 
 Note
 ====
 This is my [Eugene Petrenko](https://jonnyzzz.com/) private home project
-
